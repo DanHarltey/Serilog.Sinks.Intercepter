@@ -16,7 +16,7 @@ public static class LoggerConfigurationIntercepterExtensions
       IntercepterContext context) =>
         LoggerSinkConfiguration.Wrap(
             loggerSinkConfiguration,
-            wrappedSink => new IntercepterSink(context, wrappedSink),
+            proxyedSink => new IntercepterSink(context, proxyedSink),
             configure,
             LevelAlias.Minimum,
             null);
