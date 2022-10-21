@@ -1,0 +1,21 @@
+name: Build & Test
+on: push
+
+jobs:
+  build:
+    name: Main build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2
+
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Run build script
+      env:
+      working-directory: scripts
+      run: ./dotnet_build.sh
