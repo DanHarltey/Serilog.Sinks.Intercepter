@@ -61,7 +61,7 @@ namespace Serilog.Sinks.Intercepter.Tests
             var testSink = new TestSink();
             var logger = CreateLogger(testSink);
 
-            LogEvent expected = new(DateTimeOffset.UtcNow, LogEventLevel.Error, null, new MessageTemplateParser().Parse(String.Empty), Enumerable.Empty<LogEventProperty>());
+            var expected = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, new MessageTemplateParser().Parse(String.Empty), Enumerable.Empty<LogEventProperty>());
             var moderator = new TestIntercepter(true, logEvent => new[] { expected });
 
             // Act

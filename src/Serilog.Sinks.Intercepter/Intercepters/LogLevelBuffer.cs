@@ -2,9 +2,9 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
-namespace Serilog.Sinks.Intercepter.Internal;
+namespace Serilog.Sinks.Intercepter.Intercepters;
 
-internal sealed class LogLevelBuffer : IIntercepter
+public sealed class LogLevelBuffer : IIntercepter
 {
     private readonly LogEventLevel _triggerLevel;
     private volatile BlockingCollection<LogEvent> _cachedLogEvent = new();

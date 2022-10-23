@@ -1,4 +1,5 @@
 ﻿using Serilog.Events;
+using Serilog.Sinks.Intercepter.Intercepters;
 using Serilog.Sinks.Intercepter.Internal;
 
 namespace Serilog.Sinks.Intercepter;
