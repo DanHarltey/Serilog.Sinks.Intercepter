@@ -28,18 +28,7 @@ public sealed class IntercepterContext
     {
         var currentIntercepter = context.Intercepter;
 
-        IIntercepter newIntercepter;
-
-        if (currentIntercepter == null)
-        {
-            newIntercepter = intercepter;
-        }
-        else
-        {
-            newIntercepter = new AndIntercepter(intercepter, currentIntercepter);
-        }
-
-        context.Intercepter = newIntercepter;
+        context.Intercepter = intercepter;
         return new ContextBookmark(context, currentIntercepter);
     }
 }
