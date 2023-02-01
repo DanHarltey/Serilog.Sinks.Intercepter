@@ -1,6 +1,5 @@
 ﻿using Serilog.Core;
 using Serilog.Events;
-using System.Runtime.CompilerServices;
 
 namespace Serilog.Sinks.Intercepter;
 
@@ -17,27 +16,19 @@ public sealed class IntercepterSink : ILogEventSink
 
     public void Emit(LogEvent logEvent)
     {
-        var intercepters = _context.Intercepters;
+        var intercepter = _context.Intercepter;
 
-        foreach (var intercepter in intercepters)
+        if (intercepter == null || !intercepter.CanHandle(logEvent))
         {
-            if (intercepter.CanHandle(logEvent))
-            {
-                ProcessLogEvent(logEvent, intercepter);
-                return;
-            }
+            _proxyedSink.Emit(logEvent);
+            return;
         }
 
-        _proxyedSink.Emit(logEvent);
-    }
+        var processedEvents = intercepter.Process(logEvent);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ProcessLogEvent(LogEvent logEvent, IIntercepter intercepter)
-    {
-        var processedLogs = intercepter.Process(logEvent);
-        foreach (var processedLog in processedLogs)
+        foreach (var processedEvent in processedEvents)
         {
-            _proxyedSink.Emit(processedLog);
+            _proxyedSink.Emit(processedEvent);
         }
     }
 }

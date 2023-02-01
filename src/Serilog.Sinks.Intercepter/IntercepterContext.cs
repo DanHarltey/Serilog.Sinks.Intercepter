@@ -8,37 +8,38 @@ public sealed class IntercepterContext
 {
     public static IntercepterContext Default { get; } = new();
 
-    private readonly AsyncLocal<IIntercepter[]> _intercepters;
+    private readonly AsyncLocal<IIntercepter?> _intercepter;
 
-    public IntercepterContext() => _intercepters = new();
+    public IntercepterContext() => _intercepter = new();
 
-    internal IIntercepter[] Intercepters
+    internal IIntercepter? Intercepter
     {
-        get => _intercepters.Value ?? Array.Empty<IIntercepter>();
-        set => _intercepters.Value = value;
+        get => _intercepter.Value;
+        set => _intercepter.Value = value;
     }
 
     public static IDisposable PushLogLevelBuffer(LogEventLevel triggerLevel = LogEventLevel.Error) => PushLogLevelBuffer(Default, triggerLevel);
 
-    public static IDisposable PushLogLevelBuffer(IntercepterContext context, LogEventLevel triggerLevel = LogEventLevel.Error) => Push(context, new LogLevelBuffer(triggerLevel));
+    public static IDisposable PushLogLevelBuffer(IntercepterContext context, LogEventLevel triggerLevel = LogEventLevel.Error) => Push(context, new LogLevelBufferIntercepter(triggerLevel));
 
-    public static IDisposable Push(IIntercepter moderator) => Push(Default, moderator);
+    public static IDisposable Push(IIntercepter intercepter) => Push(Default, intercepter);
 
-    public static IDisposable Push(IntercepterContext context, IIntercepter moderator)
+    public static IDisposable Push(IntercepterContext context, IIntercepter intercepter)
     {
-        var currentIntercepters = context.Intercepters;
+        var currentIntercepter = context.Intercepter;
 
-        IIntercepter[] newIntercepters = CreateArray(moderator, currentIntercepters);
+        IIntercepter newIntercepter;
 
-        context.Intercepters = newIntercepters;
-        return new ContextBookmark(context, currentIntercepters);
-    }
+        if (currentIntercepter == null)
+        {
+            newIntercepter = intercepter;
+        }
+        else
+        {
+            newIntercepter = new AndIntercepter(intercepter, currentIntercepter);
+        }
 
-    private static IIntercepter[] CreateArray(IIntercepter intercepter, IIntercepter[] currentIntercepter)
-    {
-        var newModerators = new IIntercepter[currentIntercepter.Length + 1];
-        newModerators[0] = intercepter;
-        Array.Copy(currentIntercepter, 0, newModerators, 0, currentIntercepter.Length);
-        return newModerators;
+        context.Intercepter = newIntercepter;
+        return new ContextBookmark(context, currentIntercepter);
     }
 }

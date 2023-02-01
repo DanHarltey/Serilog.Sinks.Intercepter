@@ -1,0 +1,17 @@
+{
+  "Serilog": {
+    "MinimumLevel": "Debug",
+    "WriteTo": [
+      {
+        "Name": "Intercepter",
+        "Args": {
+          "configure": [
+            {
+              "Name": "TestSink"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
