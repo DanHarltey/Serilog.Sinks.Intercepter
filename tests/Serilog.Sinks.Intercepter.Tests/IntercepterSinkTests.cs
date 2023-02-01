@@ -125,7 +125,7 @@ public sealed class IntercepterSinkTests
             .CreateLogger();
 
         var moderator1 = new TestIntercepter(true, logEvent => Array.Empty<LogEvent>());
-        var moderator2 = new TestIntercepter(true, logEvent => throw new InvalidOperationException());
+        var moderator2 = new TestIntercepter(true, logEvent => new[] { logEvent } );
 
         // Act
         using (IntercepterContext.Push(moderator1))
@@ -133,6 +133,8 @@ public sealed class IntercepterSinkTests
         {
             logger.Information("Message");
         }
+
+        var actual = Assert.Single(testSink.LogEvents);
     }
 
     private static ILogger CreateLogger(TestSink testSink) =>
