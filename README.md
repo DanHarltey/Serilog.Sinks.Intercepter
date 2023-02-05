@@ -9,16 +9,16 @@ A wrapper for other [Serilog](https://serilog.net) sinks. This sink allows you t
 Install from [NuGet](https://nuget.org/packages/serilog.sinks.intercepter):
 
 ```powershell
-Install-Package Serilog.Sinks.Async
+Install-Package Serilog.Sinks.Intercepter
 ```
 
 Assuming you have already installed the target sink, such as the console sink, move the wrapped sink's configuration within a `WriteTo.Intercepter()` statement:
 
 ```csharp
 Log.Logger = new LoggerConfiguration()
-	.WriteTo.Intercepter(x => x.Console())
-	// Other logger configuration
-	.CreateLogger()
+  .WriteTo.Intercepter(x => x.Console())
+  // Other logger configuration
+  .CreateLogger()
 
 Log.Information("Continue to use the log as normal");
 
@@ -51,7 +51,7 @@ See [samples/Sample.WebApp/](https://github.com/DanHarltey/Serilog.Sinks.Interce
 The configuration used in the sample is similar to the first we saw:
 ```csharp
 builder.Host.UseSerilog((ctx, lc) =>
-	lc.WriteTo.Intercepter(x => x.Console()));
+  lc.WriteTo.Intercepter(x => x.Console()));
 ```
 
 The sample shows how to add `IntercepterContext.PushLogLevelBuffer` to the ASP.NET Core pipeline as middleware:
@@ -59,10 +59,10 @@ The sample shows how to add `IntercepterContext.PushLogLevelBuffer` to the ASP.N
 ```csharp
 public async Task Invoke(HttpContext httpContext)
 {
-    using (IntercepterContext.PushLogLevelBuffer())
-    {
-		await _next(httpContext);
-    }
+  using (IntercepterContext.PushLogLevelBuffer())
+  {
+      await _next(httpContext);
+  }
 }
 ```
 
@@ -73,14 +73,14 @@ Using [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settin
 ```json
 {
   "Serilog": {
-	"WriteTo": [{
-  	"Name": "Intercepter",
-  	"Args": {
-    	"configure": [{
-      	"Name": "Console"
-    	}]
-  	}
-	}]
+    "WriteTo": [{
+    "Name": "Intercepter",
+    "Args": {
+      "configure": [{
+        "Name": "Console"
+        }]
+      }
+    }]
   }
 }
 ```
