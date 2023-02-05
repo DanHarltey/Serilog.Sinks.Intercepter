@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -15,7 +15,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Serilog" Version="2.12.0" />
   </ItemGroup>
 
+  <PropertyGroup>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <PackageProjectUrl></PackageProjectUrl>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
+      <RepositoryUrl>https://github.com/DanHarltey/Serilog.Sinks.Intercepter</RepositoryUrl>
+      <PackageTags>Serilog,Sink,Buffer,Buffered</PackageTags>
+      <Description>Modify, filter, buffer event logs. Buffer log messages and conditionally output them based on later events.</Description>
+      <Copyright>Copyright (c) Dan Hartkey 2023.</Copyright>
+  </PropertyGroup>
+  
 </Project>
