@@ -13,9 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Intercepter.T
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{29884AFE-19DD-45B0-83AB-9718F51B2D83}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.WebApi", "samples\Sample.WebApi\Sample.WebApi.csproj", "{C75DDF6E-7207-41C0-9BC1-0C36464CE3DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AspMinimalApi", "samples\Sample.AspMinimalApi\Sample.AspMinimalApi.csproj", "{C75DDF6E-7207-41C0-9BC1-0C36464CE3DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.WebApp", "samples\Sample.WebApp\Sample.WebApp.csproj", "{B3D69AEC-2BAD-49B6-AA9E-B387A2F3672E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.WebApp", "samples\Sample.WebApp\Sample.WebApp.csproj", "{B3D69AEC-2BAD-49B6-AA9E-B387A2F3672E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
