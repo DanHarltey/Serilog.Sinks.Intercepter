@@ -41,19 +41,24 @@ public sealed class LogLevelBufferIntercepter : IIntercepter
                 return Enumerable.Empty<LogEvent>();
             }
             catch (InvalidOperationException)
-            { }
+            {
+                // This is thrown if the store has already CompleteAdding
+            }
         }
     }
 
     private IEnumerable<LogEvent> GetStoredLogEvents(LogEvent logEvent)
     {
+        // replace the store with null, we do not store any more logs
         var storedLogEvents = Interlocked.Exchange(ref _storedLogEvents, null);
 
         if (storedLogEvents == null)
         {
+            // the store was already null
             return new[] { logEvent };
         }
 
+        // return all stored events
         storedLogEvents.Add(logEvent);
         storedLogEvents.CompleteAdding();
         return storedLogEvents.GetConsumingEnumerable();
