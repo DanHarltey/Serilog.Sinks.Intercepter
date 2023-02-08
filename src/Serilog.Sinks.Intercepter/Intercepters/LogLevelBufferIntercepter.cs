@@ -7,7 +7,7 @@ namespace Serilog.Sinks.Intercepter.Intercepters;
 public sealed class LogLevelBufferIntercepter : IIntercepter
 {
     private readonly LogEventLevel _triggerLevel;
-    private volatile BlockingCollection<LogEvent>? _storedLogEvents = new();
+    private volatile BlockingCollection<LogEvent>? _buffer = new();
 
     public LogLevelBufferIntercepter(LogEventLevel triggerLevel) => _triggerLevel = triggerLevel;
 
@@ -15,52 +15,46 @@ public sealed class LogLevelBufferIntercepter : IIntercepter
 
     public IEnumerable<LogEvent> Process(LogEvent logEvent)
     {
+        var buffer = _buffer;
+
+        if (buffer == null)
+        {
+            return BufferAlreadyFlushed(logEvent);
+        }
+
+        try
+        {
+            buffer.Add(logEvent);
+        }
+        catch (InvalidOperationException)
+        {
+            // thrown if the store has already CompleteAdding
+            return BufferAlreadyFlushed(logEvent);
+        }
+
         if (logEvent.Level < _triggerLevel)
         {
-            return AddToStore(logEvent);
+            return Enumerable.Empty<LogEvent>();
         }
 
-        return GetStoredLogEvents(logEvent);
+        return FlushBuffer(logEvent);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IEnumerable<LogEvent> AddToStore(LogEvent logEvent)
+    private IEnumerable<LogEvent> FlushBuffer(LogEvent logEvent)
     {
-        while (true)
+        // replace the buffer with null, so we do not store any more logs
+        var buffer = Interlocked.Exchange(ref _buffer, null);
+
+        if (buffer == null)
         {
-            var storedLogEvents = _storedLogEvents;
-
-            if (storedLogEvents == null)
-            {
-                return new[] { logEvent };
-            }
-
-            try
-            {
-                storedLogEvents.Add(logEvent);
-                return Enumerable.Empty<LogEvent>();
-            }
-            catch (InvalidOperationException)
-            {
-                // This is thrown if the store has already CompleteAdding
-            }
-        }
-    }
-
-    private IEnumerable<LogEvent> GetStoredLogEvents(LogEvent logEvent)
-    {
-        // replace the store with null, we do not store any more logs
-        var storedLogEvents = Interlocked.Exchange(ref _storedLogEvents, null);
-
-        if (storedLogEvents == null)
-        {
-            // the store was already null
-            return new[] { logEvent };
+            return BufferAlreadyFlushed(logEvent);
         }
 
         // return all stored events
-        storedLogEvents.Add(logEvent);
-        storedLogEvents.CompleteAdding();
-        return storedLogEvents.GetConsumingEnumerable();
+        buffer.CompleteAdding();
+        return buffer.GetConsumingEnumerable();
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IEnumerable<LogEvent> BufferAlreadyFlushed(LogEvent logEvent) => new[] { logEvent };
 }
