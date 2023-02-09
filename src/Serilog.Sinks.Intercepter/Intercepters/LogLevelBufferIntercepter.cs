@@ -22,22 +22,21 @@ public sealed class LogLevelBufferIntercepter : IIntercepter
             return BufferAlreadyFlushed(logEvent);
         }
 
+        if (_triggerLevel <= logEvent.Level)
+        {
+            return FlushBuffer(logEvent);
+        }
+
         try
         {
             buffer.Add(logEvent);
+            return Enumerable.Empty<LogEvent>();
         }
         catch (InvalidOperationException)
         {
-            // thrown if the store has already CompleteAdding
+            // thrown if the buffer has already CompleteAdding
             return BufferAlreadyFlushed(logEvent);
         }
-
-        if (logEvent.Level < _triggerLevel)
-        {
-            return Enumerable.Empty<LogEvent>();
-        }
-
-        return FlushBuffer(logEvent);
     }
 
     private IEnumerable<LogEvent> FlushBuffer(LogEvent logEvent)
@@ -49,6 +48,9 @@ public sealed class LogLevelBufferIntercepter : IIntercepter
         {
             return BufferAlreadyFlushed(logEvent);
         }
+
+        // the above interlock ensures only one thread gets here. No need for try/catch as we know buffer has not CompleteAdding
+        buffer.Add(logEvent);
 
         // return all stored events
         buffer.CompleteAdding();
