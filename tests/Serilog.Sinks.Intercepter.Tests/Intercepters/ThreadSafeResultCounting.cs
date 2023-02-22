@@ -9,10 +9,10 @@ internal sealed class ThreadSafeResultCounting
     private readonly CancellationToken _cancellation;
 
     private int _totalAdded;
-    private int _totalCounted;
+    private int _totalReceived;
 
     public int TotalAdded => _totalAdded;
-    public int TotalCounted => _totalCounted;
+    public int TotalReceived => _totalReceived;
 
     public ThreadSafeResultCounting(IIntercepter intercepter, LogEvent[] logEvents, CancellationToken cancellation)
     {
@@ -35,8 +35,8 @@ internal sealed class ThreadSafeResultCounting
             }
         }
 
-        Interlocked.Add(ref _totalAdded, eventsReceived);
-        Interlocked.Add(ref _totalCounted, eventsAdded);
+        Interlocked.Add(ref _totalAdded, eventsAdded);
+        Interlocked.Add(ref _totalReceived, eventsReceived);
     }
 
     public void RunWithMultipleThreads(int threadCount)
