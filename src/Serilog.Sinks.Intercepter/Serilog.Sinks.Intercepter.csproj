@@ -9,11 +9,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <WarningLevel>9999</WarningLevel>
+    <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <WarningLevel>9999</WarningLevel>
+    <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,8 +37,10 @@
       <PackageTags>Serilog,Sink,Buffer,Buffered</PackageTags>
       <Description>Modify, filter, buffer event logs. Buffer log messages and conditionally output them based on later events.</Description>
       <Copyright>Copyright (c) Dan Hartkey 2023.</Copyright>
-      <AssemblyVersion>1.0.0.1</AssemblyVersion>
-      <FileVersion>1.0.0.1</FileVersion>
+      <AssemblyVersion>1.0.1</AssemblyVersion>
+      <FileVersion>1.0.1</FileVersion>
+      <GenerateDocumentationFile>True</GenerateDocumentationFile>
+      <Version>1.0.1</Version>
   </PropertyGroup>
   
 </Project>
