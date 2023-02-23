@@ -61,10 +61,10 @@ public sealed class IntercepterSinkTests
         var logger = CreateLogger(testSink);
 
         var expected = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
-        var moderator = new TestIntercepter(true, logEvent => new[] { expected });
+        var intercepter = new TestIntercepter(true, logEvent => new[] { expected });
 
         // Act
-        using (IntercepterContext.Push(moderator))
+        using (IntercepterContext.Push(intercepter))
         {
             logger.Information("Message");
         }
@@ -81,10 +81,10 @@ public sealed class IntercepterSinkTests
         var testSink = new TestSink();
         var logger = CreateLogger(testSink);
 
-        var moderator = new TestIntercepter(true, logEvent => new[] { logEvent, logEvent, logEvent });
+        var intercepter = new TestIntercepter(true, logEvent => new[] { logEvent, logEvent, logEvent });
 
         // Act
-        using (IntercepterContext.Push(moderator))
+        using (IntercepterContext.Push(intercepter))
         {
             logger.Information("Message");
         }
@@ -103,10 +103,10 @@ public sealed class IntercepterSinkTests
             .WriteTo.Intercepter(sinkConfig => sinkConfig.Sink(testSink), context)
             .CreateLogger();
 
-        var moderator = new TestIntercepter(true, logEvent => new[] { logEvent });
+        var intercepter = new TestIntercepter(true, logEvent => new[] { logEvent });
 
         // Act
-        using (IntercepterContext.Push(context, moderator))
+        using (IntercepterContext.Push(context, intercepter))
         {
             logger.Information("Message");
         }
@@ -124,12 +124,12 @@ public sealed class IntercepterSinkTests
             .WriteTo.Intercepter(sinkConfig => sinkConfig.Sink(testSink))
             .CreateLogger();
 
-        var moderator1 = new TestIntercepter(true, logEvent => Array.Empty<LogEvent>());
-        var moderator2 = new TestIntercepter(true, logEvent => new[] { logEvent } );
+        var intercepter1 = new TestIntercepter(true, logEvent => Array.Empty<LogEvent>());
+        var intercepter2 = new TestIntercepter(true, logEvent => new[] { logEvent } );
 
         // Act
-        using (IntercepterContext.Push(moderator1))
-        using (IntercepterContext.Push(moderator2))
+        using (IntercepterContext.Push(intercepter1))
+        using (IntercepterContext.Push(intercepter2))
         {
             logger.Information("Message");
         }
