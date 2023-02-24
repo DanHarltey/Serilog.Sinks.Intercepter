@@ -5,8 +5,8 @@ jobs:
   build:
     name: Main build
     runs-on: ubuntu-latest
-#
-#    steps:
+
+    steps:
 #    - name: Git checkout
 #      uses: actions/checkout@v3
 #
