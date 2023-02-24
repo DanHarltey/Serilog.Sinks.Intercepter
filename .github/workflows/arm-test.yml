@@ -1,4 +1,4 @@
-name: Build & Test
+name: ARM test
 on: push
 
 jobs:
@@ -10,18 +10,6 @@ jobs:
     - name: Git checkout
       uses: actions/checkout@v3
 
-    - name: Setup .NET 6
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 6.0.x
-
     - name: Run build script
       working-directory: scripts
-      run: ./dotnet_build.sh
-
-    - name: Upload nuget package to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: Serilog.Sinks.Intercepter
-        path: ./src/Serilog.Sinks.Intercepter/bin/Release/Serilog.Sinks.Intercepter.*.nupkg
-        if-no-files-found: error
+      run: docker run --privileged --rm tonistiigi/binfmt --install amd64

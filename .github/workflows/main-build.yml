@@ -1,5 +1,5 @@
-#name: Build & Test
-#on: push
+name: Build & Test
+on: push
 #
 #jobs:
 #  build:
