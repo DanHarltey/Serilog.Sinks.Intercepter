@@ -10,6 +10,10 @@ jobs:
     - name: Git checkout
       uses: actions/checkout@v3
 
+    - name: Pull binfmt Docker image
+      working-directory: scripts
+      run: docker pull tonistiigi/binfmt
+
     - name: Run build script
       working-directory: scripts
-      run: docker run --privileged --rm tonistiigi/binfmt --install amd64
+      run: docker run --privileged --rm tonistiigi/binfmt --install arm64

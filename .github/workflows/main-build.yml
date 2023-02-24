@@ -1,10 +1,10 @@
 name: Build & Test
 on: push
-#
-#jobs:
-#  build:
-#    name: Main build
-#    runs-on: ubuntu-latest
+
+jobs:
+  build:
+    name: Main build
+    runs-on: ubuntu-latest
 #
 #    steps:
 #    - name: Git checkout
