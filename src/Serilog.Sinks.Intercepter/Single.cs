@@ -14,19 +14,25 @@ internal class Single : IEnumerable<LogEvent>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+    enum State
+    {
+        Initial,
+        Active,
+        Complete
+    }
+
     private class SingleEnumerator : IEnumerator<LogEvent>
     {
         private readonly LogEvent _logEvent;
-        private ulong _index;
+        private State _state;
 
 
         public SingleEnumerator(LogEvent logEvent)
         {
             _logEvent = logEvent;
-            Reset();
         }
 
-        public LogEvent Current => _index == 1 ? _logEvent : default!;
+        public LogEvent Current => _state == State.Active ? _logEvent : default!;
 
         object IEnumerator.Current => this.Current;
 
@@ -34,8 +40,18 @@ internal class Single : IEnumerable<LogEvent>
         {
         }
 
-        public bool MoveNext() => _index++ == 0;
+        public bool MoveNext()
+        {
+            if (_state == State.Initial)
+            {
+                _state = State.Active;
+                return true;
+            }
 
-        public void Reset() => _index =0;
+            _state = State.Complete;
+            return false;
+        }
+
+        public void Reset() => _state = State.Initial;
     }
 }

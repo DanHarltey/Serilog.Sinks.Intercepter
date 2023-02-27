@@ -1,8 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using System;
-using Serilog.Sinks.Intercepter.Intercepters;
 using Serilog.Events;
+using Serilog.Sinks.Intercepter.Intercepters;
 
 namespace Serilog.Sinks.Intercepter.Benchmarks;
 
@@ -13,7 +12,7 @@ public class Program
     {
         _ = BenchmarkRunner.Run(typeof(Program));
     }
-    
+
     private IIntercepter? _intercepter;
     private IIntercepter? _intercepter1;
 
@@ -26,6 +25,8 @@ public class Program
         _intercepter = new LogLevelBufferIntercepter(LogEventLevel.Error);
         _intercepter1 = new LogLevelBufferIntercepter1(LogEventLevel.Error);
         _errorLogEvent = GetLogEvent(LogEventLevel.Error);
+        _ = _intercepter.Process(_errorLogEvent);
+        _ = _intercepter1.Process(_errorLogEvent);
     }
 
 
@@ -41,6 +42,7 @@ public class Program
             obj = item;
         }
         return obj;
+
     }
 
     [Benchmark()]
