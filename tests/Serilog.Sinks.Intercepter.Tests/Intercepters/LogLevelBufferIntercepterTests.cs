@@ -113,8 +113,7 @@ public class LogLevelBufferIntercepterTests
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
 
-        var cancellationSource = new CancellationTokenSource(0_500);
-        var resultCounting = CreateResultCounting(logLevelBuffer, cancellationSource.Token);
+        var resultCounting = CreateResultCounting(logLevelBuffer);
 
         // Act
         resultCounting.RunWithMultipleThreads(threadCount: 24);
@@ -123,7 +122,7 @@ public class LogLevelBufferIntercepterTests
         Assert.Equal(resultCounting.TotalAdded, resultCounting.TotalReceived);
     }
 
-    private static ThreadSafeResultCounting CreateResultCounting(IIntercepter intercepter, CancellationToken cancellationToken)
+    private static ThreadSafeResultCounting CreateResultCounting(IIntercepter intercepter)
     {
         var infoEvent = GetLogEvent(LogEventLevel.Information);
         var errorEvent = GetLogEvent(LogEventLevel.Error);
@@ -144,7 +143,7 @@ public class LogLevelBufferIntercepterTests
             errorEvent
         };
 
-        return new ThreadSafeResultCounting(intercepter, logEvents, cancellationToken);
+        return new ThreadSafeResultCounting(intercepter, logEvents);
     }
 
     private static LogEvent GetLogEvent(LogEventLevel logLevel = LogEventLevel.Debug) => new(
