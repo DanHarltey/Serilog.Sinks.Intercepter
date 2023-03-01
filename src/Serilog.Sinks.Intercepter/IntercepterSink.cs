@@ -18,9 +18,14 @@ public sealed class IntercepterSink : ILogEventSink
     {
         var intercepter = _context.Intercepter;
 
-        if (intercepter == null || !intercepter.CanHandle(logEvent))
+        if (intercepter == null)
         {
             _proxyedSink.Emit(logEvent);
+            return;
+        }
+
+        if (intercepter.Reject(logEvent))
+        {
             return;
         }
 

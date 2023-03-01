@@ -6,19 +6,19 @@ namespace Serilog.Sinks.Intercepter.Tests.Intercepters;
 public class LogLevelBufferIntercepterTests
 {
     [Fact]
-    public void CanHandleAnyLog()
+    public void DoesNotRejectAnyLog()
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
 
         var logMessages = Enum.GetValues<LogEventLevel>()
-            .Select(x => GetLogEvent(x));
+            .Select(x => CreateLogEvent(x));
 
         // Act
-        var results = logMessages.Select(x => logLevelBuffer.CanHandle(x));
+        var results = logMessages.Select(x => logLevelBuffer.Reject(x));
 
         // Assert
-        Assert.Equal(results, Enumerable.Repeat(true, logMessages.Count()));
+        Assert.Equal(results, Enumerable.Repeat(false, logMessages.Count()));
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public class LogLevelBufferIntercepterTests
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
 
-        var message = GetLogEvent(LogEventLevel.Debug);
+        var message = CreateLogEvent(LogEventLevel.Debug);
 
         // Act
         var actual = logLevelBuffer.Process(message);
@@ -41,7 +41,7 @@ public class LogLevelBufferIntercepterTests
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
-        var expected = GetLogEvent(LogEventLevel.Error);
+        var expected = CreateLogEvent(LogEventLevel.Error);
 
         // Act
         var result = logLevelBuffer.Process(expected);
@@ -56,7 +56,7 @@ public class LogLevelBufferIntercepterTests
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
-        var expected = GetLogEvent(LogEventLevel.Fatal);
+        var expected = CreateLogEvent(LogEventLevel.Fatal);
 
         // Act
         var result = logLevelBuffer.Process(expected);
@@ -74,7 +74,7 @@ public class LogLevelBufferIntercepterTests
         var triggerLog = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
 
         var expected = Enum.GetValues<LogEventLevel>()
-            .Select(x => GetLogEvent(x))
+            .Select(x => CreateLogEvent(x))
             .ToList();
 
         // Act
@@ -91,8 +91,8 @@ public class LogLevelBufferIntercepterTests
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
-        var eventLog = GetLogEvent(LogEventLevel.Debug);
-        var triggerLog = GetLogEvent(LogEventLevel.Error);
+        var eventLog = CreateLogEvent(LogEventLevel.Debug);
+        var triggerLog = CreateLogEvent(LogEventLevel.Error);
 
         var expected = Enumerable.Repeat(eventLog, 5).Concat(new[] { triggerLog });
 
@@ -108,7 +108,7 @@ public class LogLevelBufferIntercepterTests
     }
 
     [Fact]
-    public void ProcessDoesNotLoseLogsWhenUsedConcurrently()
+    public void ProcessReturnsCorrectLogsWhenUsedConcurrently()
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
@@ -124,8 +124,8 @@ public class LogLevelBufferIntercepterTests
 
     private static ThreadSafeResultCounting CreateResultCounting(IIntercepter intercepter)
     {
-        var infoEvent = GetLogEvent(LogEventLevel.Information);
-        var errorEvent = GetLogEvent(LogEventLevel.Error);
+        var infoEvent = CreateLogEvent(LogEventLevel.Information);
+        var errorEvent = CreateLogEvent(LogEventLevel.Error);
 
         var logEvents = new[]
         {
@@ -146,10 +146,11 @@ public class LogLevelBufferIntercepterTests
         return new ThreadSafeResultCounting(intercepter, logEvents);
     }
 
-    private static LogEvent GetLogEvent(LogEventLevel logLevel = LogEventLevel.Debug) => new(
-        DateTimeOffset.UtcNow,
-        logLevel,
-        null,
-        MessageTemplate.Empty,
-        Enumerable.Empty<LogEventProperty>());
+    private static LogEvent CreateLogEvent(LogEventLevel logLevel = LogEventLevel.Debug) =>
+        new(
+            DateTimeOffset.UtcNow,
+            logLevel,
+            null,
+            MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>());
 }

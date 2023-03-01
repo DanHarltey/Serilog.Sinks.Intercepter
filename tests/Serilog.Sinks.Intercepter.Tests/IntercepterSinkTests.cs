@@ -6,34 +6,39 @@ namespace Serilog.Sinks.Intercepter.Tests;
 public sealed class IntercepterSinkTests
 {
     [Fact]
-    public void EmptyInterceptersThenPassThroughLogEvent()
+    public void EmptyIntercepterThenEmitLogEvent()
     {
         // Arrange
         var testSink = new TestSink();
         var logger = CreateLogger(testSink);
+        var expected = CreateLogEvent();
 
         // Act
-        logger.Information("Message");
+        logger.Write(expected);
 
         // Assert
-        Assert.Single(testSink.LogEvents);
+        var actual = Assert.Single(testSink.LogEvents);
+        Assert.Same(expected, actual);
     }
 
     [Fact]
-    public void NoInterceptersCanHandleThenPassThroughLogEvent()
+    public void IntercepterRejectReturnsTrueThenDoNotEmitLogEvent()
     {
         // Arrange
         var testSink = new TestSink();
         var logger = CreateLogger(testSink);
+        var intercepter = new TestIntercepter(true, x => throw new NotImplementedException());
 
         // Act
-        using (IntercepterContext.Push(new TestIntercepter(false, x => throw new NotImplementedException())))
+        using (IntercepterContext.Push(intercepter))
         {
             logger.Information("Message");
         }
 
         // Assert
-        Assert.Single(testSink.LogEvents);
+        Assert.Empty(testSink.LogEvents);
+        Assert.True(intercepter.RejectCalled);
+        Assert.False(intercepter.ProcessCalled);
     }
 
     [Fact]
@@ -42,15 +47,18 @@ public sealed class IntercepterSinkTests
         // Arrange
         var testSink = new TestSink();
         var logger = CreateLogger(testSink);
+        var intercepter = new TestIntercepter(false, x => Enumerable.Empty<LogEvent>());
 
         // Act
-        using (IntercepterContext.Push(new TestIntercepter(true, x => Enumerable.Empty<LogEvent>())))
+        using (IntercepterContext.Push(intercepter))
         {
             logger.Information("Message");
         }
 
         // Assert
         Assert.Empty(testSink.LogEvents);
+        Assert.True(intercepter.RejectCalled);
+        Assert.True(intercepter.ProcessCalled);
     }
 
     [Fact]
@@ -59,19 +67,21 @@ public sealed class IntercepterSinkTests
         // Arrange
         var testSink = new TestSink();
         var logger = CreateLogger(testSink);
+        var expected = CreateLogEvent();
 
-        var expected = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
-        var intercepter = new TestIntercepter(true, logEvent => new[] { expected });
+        var intercepter = new TestIntercepter(false, logEvent => new[] { logEvent });
 
         // Act
         using (IntercepterContext.Push(intercepter))
         {
-            logger.Information("Message");
+            logger.Write(expected);
         }
 
         // Assert
         var actual = Assert.Single(testSink.LogEvents);
         Assert.Same(expected, actual);
+        Assert.True(intercepter.RejectCalled);
+        Assert.True(intercepter.ProcessCalled);
     }
 
     [Fact]
@@ -80,8 +90,9 @@ public sealed class IntercepterSinkTests
         // Arrange
         var testSink = new TestSink();
         var logger = CreateLogger(testSink);
+        var expected = new[] { CreateLogEvent(), CreateLogEvent(), CreateLogEvent() };
 
-        var intercepter = new TestIntercepter(true, logEvent => new[] { logEvent, logEvent, logEvent });
+        var intercepter = new TestIntercepter(false, logEvent => expected);
 
         // Act
         using (IntercepterContext.Push(intercepter))
@@ -90,11 +101,14 @@ public sealed class IntercepterSinkTests
         }
 
         // Assert
-        Assert.Equal(3, testSink.LogEvents.Count());
+        Assert.Equal(expected, testSink.LogEvents);
+
+        Assert.True(intercepter.RejectCalled);
+        Assert.True(intercepter.ProcessCalled);
     }
 
     [Fact]
-    public void CanUseCustomContextForIntercepters()
+    public void CanUseCustomContextForIntercepter()
     {
         // Arrange
         var testSink = new TestSink();
@@ -103,16 +117,21 @@ public sealed class IntercepterSinkTests
             .WriteTo.Intercepter(sinkConfig => sinkConfig.Sink(testSink), context)
             .CreateLogger();
 
-        var intercepter = new TestIntercepter(true, logEvent => new[] { logEvent });
+        var intercepter = new TestIntercepter(false, logEvent => new[] { logEvent });
+        var expected = CreateLogEvent();
 
         // Act
         using (IntercepterContext.Push(context, intercepter))
         {
-            logger.Information("Message");
+            logger.Write(expected);
         }
 
         // Assert
         var actual = Assert.Single(testSink.LogEvents);
+        Assert.Same(expected, actual);
+
+        Assert.True(intercepter.RejectCalled);
+        Assert.True(intercepter.ProcessCalled);
     }
 
     [Fact]
@@ -124,21 +143,37 @@ public sealed class IntercepterSinkTests
             .WriteTo.Intercepter(sinkConfig => sinkConfig.Sink(testSink))
             .CreateLogger();
 
-        var intercepter1 = new TestIntercepter(true, logEvent => Array.Empty<LogEvent>());
-        var intercepter2 = new TestIntercepter(true, logEvent => new[] { logEvent } );
+        var intercepter1 = new TestIntercepter(false, logEvent => Enumerable.Empty<LogEvent>());
+        var intercepter2 = new TestIntercepter(false, logEvent => new[] { logEvent });
+        var expected = CreateLogEvent();
 
         // Act
         using (IntercepterContext.Push(intercepter1))
         using (IntercepterContext.Push(intercepter2))
         {
-            logger.Information("Message");
+            logger.Write(expected);
         }
 
         var actual = Assert.Single(testSink.LogEvents);
+        Assert.Same(expected, actual);
+
+        Assert.False(intercepter1.RejectCalled);
+        Assert.False(intercepter1.ProcessCalled);
+
+        Assert.True(intercepter2.RejectCalled);
+        Assert.True(intercepter2.ProcessCalled);
     }
 
     private static ILogger CreateLogger(TestSink testSink) =>
         new LoggerConfiguration()
             .WriteTo.Intercepter(sinkConfig => sinkConfig.Sink(testSink))
             .CreateLogger();
+
+    private static LogEvent CreateLogEvent(LogEventLevel logLevel = LogEventLevel.Information) =>
+        new(
+            DateTimeOffset.UtcNow,
+            logLevel,
+            null,
+            MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>());
 }
