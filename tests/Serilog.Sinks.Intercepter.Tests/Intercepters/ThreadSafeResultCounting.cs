@@ -36,7 +36,7 @@ internal sealed class ThreadSafeResultCounting
         {
             foreach (var logEvent in _logEvents)
             {
-                eventsReceived += _intercepter.Process(logEvent).Count();
+                eventsReceived += _intercepter.Intercept(logEvent).Count();
                 ++eventsAdded;
             }
         }

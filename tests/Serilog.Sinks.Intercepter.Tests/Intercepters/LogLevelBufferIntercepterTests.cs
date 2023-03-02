@@ -22,7 +22,7 @@ public class LogLevelBufferIntercepterTests
     }
 
     [Fact]
-    public void ProcessReturnsEmptyWhenBelowTriggerLevel()
+    public void InterceptReturnsEmptyWhenBelowTriggerLevel()
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
@@ -30,21 +30,21 @@ public class LogLevelBufferIntercepterTests
         var message = CreateLogEvent(LogEventLevel.Debug);
 
         // Act
-        var actual = logLevelBuffer.Process(message);
+        var actual = logLevelBuffer.Intercept(message);
 
         // Assert
         Assert.Empty(actual);
     }
 
     [Fact]
-    public void ProcessReturnsLogWhenTriggerLevel()
+    public void InterceptReturnsLogWhenTriggerLevel()
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
         var expected = CreateLogEvent(LogEventLevel.Error);
 
         // Act
-        var result = logLevelBuffer.Process(expected);
+        var result = logLevelBuffer.Intercept(expected);
 
         // Assert
         var actual = Assert.Single(result);
@@ -52,14 +52,14 @@ public class LogLevelBufferIntercepterTests
     }
 
     [Fact]
-    public void ProcessReturnsLogWhenAboveTriggerLevel()
+    public void InterceptReturnsLogWhenAboveTriggerLevel()
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
         var expected = CreateLogEvent(LogEventLevel.Fatal);
 
         // Act
-        var result = logLevelBuffer.Process(expected);
+        var result = logLevelBuffer.Intercept(expected);
 
         // Assert
         var actual = Assert.Single(result);
@@ -67,7 +67,7 @@ public class LogLevelBufferIntercepterTests
     }
 
     [Fact]
-    public void ProcessReturnsAllLogLevelsAfterTrigger()
+    public void InterceptReturnsAllLogLevelsAfterTrigger()
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
@@ -78,8 +78,8 @@ public class LogLevelBufferIntercepterTests
             .ToList();
 
         // Act
-        logLevelBuffer.Process(triggerLog);
-        var actual = expected.SelectMany(x => logLevelBuffer.Process(x));
+        logLevelBuffer.Intercept(triggerLog);
+        var actual = expected.SelectMany(x => logLevelBuffer.Intercept(x));
 
         // Assert
         Assert.Equal(expected, actual);
@@ -87,7 +87,7 @@ public class LogLevelBufferIntercepterTests
 
 
     [Fact]
-    public void ProcessStoresLogEventsAndReturnsThemOnTrigger()
+    public void InterceptStoresLogEventsAndReturnsThemOnTrigger()
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
@@ -99,16 +99,16 @@ public class LogLevelBufferIntercepterTests
         // Act
         for (int i = 0; i < 5; i++)
         {
-            Assert.Empty(logLevelBuffer.Process(eventLog));
+            Assert.Empty(logLevelBuffer.Intercept(eventLog));
         }
-        var actual = logLevelBuffer.Process(triggerLog);
+        var actual = logLevelBuffer.Intercept(triggerLog);
 
         // Assert
         Assert.Equal(expected, actual);
     }
 
     [Fact]
-    public void ProcessReturnsCorrectLogsWhenUsedConcurrently()
+    public void InterceptReturnsCorrectLogsWhenUsedConcurrently()
     {
         // Arrange
         var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);

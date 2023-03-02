@@ -5,17 +5,17 @@ namespace Serilog.Sinks.Intercepter.Tests.Mocks;
 internal sealed class TestIntercepter : IIntercepter
 {
     private readonly bool _reject;
-    private readonly Func<LogEvent, IEnumerable<LogEvent>> _process;
+    private readonly Func<LogEvent, IEnumerable<LogEvent>> _intercept;
 
-    public TestIntercepter(bool reject, Func<LogEvent, IEnumerable<LogEvent>> process)
+    public TestIntercepter(bool reject, Func<LogEvent, IEnumerable<LogEvent>> intercept)
     {
         _reject = reject;
-        _process = process;
+        _intercept = intercept;
     }
 
     internal bool RejectCalled { get; private set; }
 
-    internal bool ProcessCalled { get; private set; }
+    internal bool InterceptCalled { get; private set; }
 
     public bool Reject(LogEvent logEvent)
     {
@@ -23,9 +23,9 @@ internal sealed class TestIntercepter : IIntercepter
         return _reject;
     }
 
-    public IEnumerable<LogEvent> Process(LogEvent logEvent)
+    public IEnumerable<LogEvent> Intercept(LogEvent logEvent)
     {
-        ProcessCalled = true;
-        return _process(logEvent);
+        InterceptCalled = true;
+        return _intercept(logEvent);
     }
 }

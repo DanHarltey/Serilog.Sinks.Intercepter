@@ -29,11 +29,11 @@ public sealed class IntercepterSink : ILogEventSink
             return;
         }
 
-        var processedEvents = intercepter.Process(logEvent);
+        var interceptedEvents = intercepter.Intercept(logEvent);
 
-        foreach (var processedEvent in processedEvents)
+        foreach (var interceptedEvent in interceptedEvents)
         {
-            _proxyedSink.Emit(processedEvent);
+            _proxyedSink.Emit(interceptedEvent);
         }
     }
 }

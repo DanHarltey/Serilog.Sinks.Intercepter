@@ -38,7 +38,7 @@ public sealed class IntercepterSinkTests
         // Assert
         Assert.Empty(testSink.LogEvents);
         Assert.True(intercepter.RejectCalled);
-        Assert.False(intercepter.ProcessCalled);
+        Assert.False(intercepter.InterceptCalled);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public sealed class IntercepterSinkTests
         // Assert
         Assert.Empty(testSink.LogEvents);
         Assert.True(intercepter.RejectCalled);
-        Assert.True(intercepter.ProcessCalled);
+        Assert.True(intercepter.InterceptCalled);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public sealed class IntercepterSinkTests
         var actual = Assert.Single(testSink.LogEvents);
         Assert.Same(expected, actual);
         Assert.True(intercepter.RejectCalled);
-        Assert.True(intercepter.ProcessCalled);
+        Assert.True(intercepter.InterceptCalled);
     }
 
     [Fact]
@@ -104,7 +104,7 @@ public sealed class IntercepterSinkTests
         Assert.Equal(expected, testSink.LogEvents);
 
         Assert.True(intercepter.RejectCalled);
-        Assert.True(intercepter.ProcessCalled);
+        Assert.True(intercepter.InterceptCalled);
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public sealed class IntercepterSinkTests
         Assert.Same(expected, actual);
 
         Assert.True(intercepter.RejectCalled);
-        Assert.True(intercepter.ProcessCalled);
+        Assert.True(intercepter.InterceptCalled);
     }
 
     [Fact]
@@ -158,10 +158,10 @@ public sealed class IntercepterSinkTests
         Assert.Same(expected, actual);
 
         Assert.False(intercepter1.RejectCalled);
-        Assert.False(intercepter1.ProcessCalled);
+        Assert.False(intercepter1.InterceptCalled);
 
         Assert.True(intercepter2.RejectCalled);
-        Assert.True(intercepter2.ProcessCalled);
+        Assert.True(intercepter2.InterceptCalled);
     }
 
     private static ILogger CreateLogger(TestSink testSink) =>

@@ -13,7 +13,7 @@ public sealed class LogLevelBufferIntercepter : IIntercepter
 
     public bool Reject(LogEvent logEvent) => false;
 
-    public IEnumerable<LogEvent> Process(LogEvent logEvent)
+    public IEnumerable<LogEvent> Intercept(LogEvent logEvent)
     {
         var buffer = _buffer;
 
