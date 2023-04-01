@@ -7,7 +7,7 @@ public static class LoggerConfigurationIntercepterExtensions
 {
     public static LoggerConfiguration Intercepter(
        this LoggerSinkConfiguration loggerSinkConfiguration,
-       Action<LoggerSinkConfiguration> configure) => 
+       Action<LoggerSinkConfiguration> configure) =>
         Intercepter(loggerSinkConfiguration, configure, IntercepterContext.Default);
 
     public static LoggerConfiguration Intercepter(
