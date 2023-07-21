@@ -1,10 +1,11 @@
 ﻿using Serilog.Events;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Serilog.Sinks.Intercepter.Intercepters;
 
-public sealed class LogLevelBufferIntercepter : IIntercepter
+public sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
 {
     private readonly LogEventLevel _triggerLevel;
     private volatile BlockingCollection<LogEvent>? _buffer = new();
@@ -15,6 +16,11 @@ public sealed class LogLevelBufferIntercepter : IIntercepter
 
     public IEnumerable<LogEvent> Intercept(LogEvent logEvent)
     {
+        if(logEvent is null)
+        {
+            throw new ArgumentNullException(nameof(logEvent));
+        }
+
         var buffer = _buffer;
 
         if (buffer == null)
@@ -59,4 +65,6 @@ public sealed class LogLevelBufferIntercepter : IIntercepter
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IEnumerable<LogEvent> BufferAlreadyFlushed(LogEvent logEvent) => new[] { logEvent };
+
+    public void Dispose() => _buffer?.Dispose();
 }

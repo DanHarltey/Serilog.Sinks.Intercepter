@@ -26,6 +26,11 @@ public sealed class IntercepterContext
 
     public static IDisposable Push(IntercepterContext context, IIntercepter intercepter)
     {
+        if( context is null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
+
         var currentIntercepter = context.Intercepter;
 
         context.Intercepter = intercepter;

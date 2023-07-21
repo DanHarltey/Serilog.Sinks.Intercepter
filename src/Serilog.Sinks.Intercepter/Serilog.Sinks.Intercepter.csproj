@@ -1,9 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net471;net5.0;net6.0;net7.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LangVersion>11.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -28,6 +32,12 @@
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.12.0" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Using Remove="System.Net.Http" />
+    <Using Remove="System.IO" />
+    <Using Remove="System.Linq" />
+  </ItemGroup>
 
   <PropertyGroup>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -41,6 +51,9 @@
       <FileVersion>1.0.1</FileVersion>
       <GenerateDocumentationFile>True</GenerateDocumentationFile>
       <Version>1.0.1</Version>
+      <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
+      <EnableNETAnalyzers>True</EnableNETAnalyzers>
+      <AnalysisLevel>latest-all</AnalysisLevel>
   </PropertyGroup>
   
 </Project>
