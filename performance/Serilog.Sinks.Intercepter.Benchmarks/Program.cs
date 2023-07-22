@@ -15,6 +15,7 @@ public class Program
 
     private IIntercepter? _intercepter;
     private IIntercepter? _intercepter1;
+    private IIntercepter? _intercepter2;
 
     private LogEvent? _errorLogEvent;
 
@@ -24,11 +25,13 @@ public class Program
     {
         _intercepter = new LogLevelBufferIntercepter(LogEventLevel.Error);
         _intercepter1 = new LogLevelBufferIntercepter1(LogEventLevel.Error);
+        _intercepter2 = new LogLevelBufferIntercepter2(LogEventLevel.Error);
+
         _errorLogEvent = GetLogEvent(LogEventLevel.Error);
         _ = _intercepter.Process(_errorLogEvent);
         _ = _intercepter1.Process(_errorLogEvent);
+        _ = _intercepter2.Process(_errorLogEvent);
     }
-
 
     [Benchmark(Baseline = true)]
     public object? Array()
@@ -51,6 +54,20 @@ public class Program
         object? obj = null;
 
         var events = _intercepter1!.Process(_errorLogEvent!);
+
+        foreach (var item in events)
+        {
+            obj = item;
+        }
+        return obj;
+    }
+
+    [Benchmark()]
+    public object? Singal2()
+    {
+        object? obj = null;
+
+        var events = _intercepter2!.Process(_errorLogEvent!);
 
         foreach (var item in events)
         {
