@@ -25,3 +25,12 @@ jobs:
         name: Serilog.Sinks.Intercepter
         path: ./src/Serilog.Sinks.Intercepter/bin/Release/Serilog.Sinks.Intercepter.*.nupkg
         if-no-files-found: error
+
+    - name: Move coverage report
+      run: find -name "coverage.info" -type f -exec mv {} . \;
+
+    - name: Upload test coverage to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        format: lcov
+        file: coverage.info
