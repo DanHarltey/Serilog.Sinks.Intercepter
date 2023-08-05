@@ -22,6 +22,17 @@ public class LogLevelBufferIntercepterTests
     }
 
     [Fact]
+    public void InterceptThrowsArgNull()
+    {
+        // Arrange
+        var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
+
+        // Act, Assert
+        var exception = Assert.Throws<ArgumentNullException>(() => logLevelBuffer.Intercept(null!));
+        Assert.Equal("logEvent", exception.ParamName);
+    }
+
+    [Fact]
     public void InterceptReturnsEmptyWhenBelowTriggerLevel()
     {
         // Arrange

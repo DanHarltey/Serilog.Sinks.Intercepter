@@ -47,10 +47,10 @@
       <PackageTags>Serilog,Sink,Buffer,Buffered</PackageTags>
       <Description>Modify, filter, buffer event logs. Buffer log messages and conditionally output them based on later events.</Description>
       <Copyright>Copyright (c) Dan Hartkey 2023.</Copyright>
-      <AssemblyVersion>1.0.2</AssemblyVersion>
-      <FileVersion>1.0.2</FileVersion>
+      <AssemblyVersion>1.0.1</AssemblyVersion>
+      <FileVersion>1.0.1</FileVersion>
       <GenerateDocumentationFile>True</GenerateDocumentationFile>
-      <Version>1.0.2</Version>
+      <Version>1.0.1</Version>
       <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
       <EnableNETAnalyzers>True</EnableNETAnalyzers>
       <AnalysisLevel>latest-all</AnalysisLevel>
