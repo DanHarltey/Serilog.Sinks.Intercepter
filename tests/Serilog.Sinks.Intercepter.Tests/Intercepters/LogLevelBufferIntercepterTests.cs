@@ -121,45 +121,66 @@ public class LogLevelBufferIntercepterTests
     [Fact]
     public void InterceptReturnsCorrectLogsWhenUsedConcurrently()
     {
-        // Arrange
-        var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
+        const int ThreadCount = 24;
+        const int TestExecutions = 70;
 
-        var resultCounting = CreateResultCounting(logLevelBuffer);
+        var random = new Random(69);
 
-        // Act
-        resultCounting.RunWithMultipleThreads(threadCount: 24);
+        for (int i = 0; i < TestExecutions; i++)
+        {
+            // Arrange
+            var intercepter = new LogLevelBufferIntercepter(LogEventLevel.Error);
+            var resultCounting = new ThreadSafeResultCounting(intercepter);
+            var logEvents = CreateLogEvents(random);
 
-        // Assert
-        Assert.Equal(resultCounting.TotalAdded, resultCounting.TotalReceived);
+            // Act
+            resultCounting.RunWithMultipleThreads(ThreadCount, logEvents);
+
+            // Assert
+            Assert.False(resultCounting.HasException);
+            Assert.Equal(resultCounting.TotalAdded, resultCounting.TotalReceived);
+        }
     }
 
-    private static ThreadSafeResultCounting CreateResultCounting(IIntercepter intercepter)
+    private static Func<LogEvent[]> CreateLogEvents(Random random)
     {
-        var infoEvent = CreateLogEvent(LogEventLevel.Information);
-        var errorEvent = CreateLogEvent(LogEventLevel.Error);
+        var arraySize = random.Next(500, 10_000);
+        var logLevels = new LogEventLevel[arraySize];
 
-        var logEvents = new[]
+        var errorPercentage = random.Next(1, 100);
+
+        for (int i = 0; i < logLevels.Length; i++)
         {
-            infoEvent,
-            infoEvent,
-            infoEvent,
-            infoEvent,
-            infoEvent,
-            infoEvent,
-            infoEvent,
-            infoEvent,
-            infoEvent,
-            errorEvent,
-            errorEvent,
-            errorEvent
-        };
+            var chance = random.Next(0, 100);
 
-        return new ThreadSafeResultCounting(intercepter, logEvents);
+            if (chance > errorPercentage)
+            {
+                logLevels[i] = LogEventLevel.Information;
+            }
+            else
+            {
+                logLevels[i] = LogEventLevel.Error;
+            }
+        }
+
+        // at least one error to flush buffer
+        logLevels[^1] = LogEventLevel.Error;
+
+        LogEvent[] createLogEvents()
+        {
+            var logEvents = new LogEvent[logLevels.Length];
+            for (int i = 0; i < logEvents.Length; i++)
+            {
+                logEvents[i] = CreateLogEvent(logLevels[i]);
+            }
+            return logEvents;
+        }
+
+        return createLogEvents;
     }
 
     private static LogEvent CreateLogEvent(LogEventLevel logLevel = LogEventLevel.Debug) =>
-        new(
-            DateTimeOffset.UtcNow,
+        new(DateTimeOffset.UtcNow,
             logLevel,
             null,
             MessageTemplate.Empty,

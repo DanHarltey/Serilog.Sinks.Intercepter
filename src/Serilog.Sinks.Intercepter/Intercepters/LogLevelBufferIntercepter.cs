@@ -16,7 +16,7 @@ public sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
 
     public IEnumerable<LogEvent> Intercept(LogEvent logEvent)
     {
-        if(logEvent is null)
+        if (logEvent is null)
         {
             throw new ArgumentNullException(nameof(logEvent));
         }

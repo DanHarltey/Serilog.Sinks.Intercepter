@@ -5,58 +5,33 @@ namespace Serilog.Sinks.Intercepter.Tests.Intercepters;
 internal sealed class ThreadSafeResultCounting
 {
     private readonly IIntercepter _intercepter;
-    private readonly LogEvent[] _logEvents;
-    private readonly CancellationTokenSource _cancellationSource;
-    private readonly CancellationToken _cancellation;
     private readonly ManualResetEvent _startEvent;
+    private readonly HashSet<LogEvent> _allReceivedLogs;
 
-    private int _totalAdded;
-    private int _totalReceived;
+    public bool HasException { get; private set; }
+    public int TotalAdded { get; private set; }
+    public int TotalReceived => _allReceivedLogs.Count;
 
-    public int TotalAdded => _totalAdded;
-    public int TotalReceived => _totalReceived;
-
-    public ThreadSafeResultCounting(IIntercepter intercepter, LogEvent[] logEvents)
+    public ThreadSafeResultCounting(IIntercepter intercepter)
     {
         _intercepter = intercepter;
-        _logEvents = logEvents;
-        _cancellationSource = new CancellationTokenSource();
-        _cancellation = _cancellationSource.Token;
         _startEvent = new ManualResetEvent(false);
+        _allReceivedLogs = new HashSet<LogEvent>();
     }
 
-    public void SubmitLogEvents()
-    {
-        var eventsAdded = 0;
-        var eventsReceived = 0;
-
-        _startEvent.WaitOne();
-
-        while (!_cancellation.IsCancellationRequested)
-        {
-            foreach (var logEvent in _logEvents)
-            {
-                eventsReceived += _intercepter.Intercept(logEvent).Count();
-                ++eventsAdded;
-            }
-        }
-
-        Interlocked.Add(ref _totalAdded, eventsAdded);
-        Interlocked.Add(ref _totalReceived, eventsReceived);
-    }
-
-    public void RunWithMultipleThreads(int threadCount)
+    public void RunWithMultipleThreads(int threadCount, Func<LogEvent[]> createLogEvents)
     {
         var threads = new Thread[threadCount];
 
         // create threads
         for (int i = 0; i < threads.Length; i++)
         {
+            var threadEvents = createLogEvents();
             threads[i] = new Thread(SubmitLogEvents);
-            threads[i].Start();
+            threads[i].Start(threadEvents);
         }
 
-        // Wait for threads to hit startEvent
+        // wait for threads to hit startEvent
         var wait = new SpinWait();
         for (int i = 0; i < threads.Length; i++)
         {
@@ -66,8 +41,6 @@ internal sealed class ThreadSafeResultCounting
             }
         }
 
-        _cancellationSource.CancelAfter(500);
-
         // set all threads going
         _startEvent.Set();
 
@@ -75,6 +48,41 @@ internal sealed class ThreadSafeResultCounting
         foreach (var thread in threads)
         {
             thread.Join();
+        }
+    }
+
+    private void SubmitLogEvents(object? obj)
+        => SubmitLogEvents((LogEvent[])obj!);
+
+    private void SubmitLogEvents(LogEvent[] inputEvents)
+    {
+        var logsReceived = new List<LogEvent>();
+
+        _startEvent.WaitOne();
+
+        foreach (var inputEvent in inputEvents)
+        {
+            try
+            {
+                var interceptedLogs = _intercepter.Intercept(inputEvent);
+                logsReceived.AddRange(interceptedLogs);
+            }
+            catch
+            {
+                HasException = true;
+                Interlocked.MemoryBarrier();
+                return;
+            }
+        }
+
+        lock (_allReceivedLogs)
+        {
+            TotalAdded += inputEvents.Length;
+
+            foreach (var logEvent in logsReceived)
+            {
+                _allReceivedLogs.Add(logEvent);
+            }
         }
     }
 }
