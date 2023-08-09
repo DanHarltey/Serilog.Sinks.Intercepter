@@ -8,9 +8,41 @@ internal sealed class ThreadSafeResultCounting
     private readonly ManualResetEvent _startEvent;
     private readonly HashSet<LogEvent> _allReceivedLogs;
 
-    public bool HasException { get; private set; }
-    public int TotalAdded { get; private set; }
-    public int TotalReceived => _allReceivedLogs.Count;
+    private bool _hasException;
+    private int _totalAdded;
+
+    public bool HasException
+    {
+        get
+        {
+            lock (_allReceivedLogs)
+            {
+                return _hasException;
+            }
+        }
+    }
+
+    public int TotalAdded
+    {
+        get
+        {
+            lock(_allReceivedLogs)
+            {
+                return _totalAdded;
+            }
+        }
+    }
+
+    public int TotalReceived
+    {
+        get
+        {
+            lock (_allReceivedLogs)
+            {
+                return _allReceivedLogs.Count;
+            }
+        }
+    }
 
     public ThreadSafeResultCounting(IIntercepter intercepter)
     {
@@ -69,15 +101,17 @@ internal sealed class ThreadSafeResultCounting
             }
             catch
             {
-                HasException = true;
-                Interlocked.MemoryBarrier();
+                lock (_allReceivedLogs)
+                {
+                    _hasException = true;
+                }
                 return;
             }
         }
 
         lock (_allReceivedLogs)
         {
-            TotalAdded += inputEvents.Length;
+            _totalAdded += inputEvents.Length;
 
             foreach (var logEvent in logsReceived)
             {
