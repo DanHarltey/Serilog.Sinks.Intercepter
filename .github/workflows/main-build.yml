@@ -23,7 +23,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Serilog.Sinks.Intercepter
-        path: ./src/Serilog.Sinks.Intercepter/bin/Release/Serilog.Sinks.Intercepter.*.nupkg
+        path: ./src/Serilog.Sinks.Intercepter/bin/Release/Serilog.Sinks.Intercepter.*.*upkg
         if-no-files-found: error
 
     - name: Move coverage report
