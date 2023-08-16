@@ -1,4 +1,5 @@
 # Serilog.Sinks.Intercepter
+[![NuGet](https://img.shields.io/nuget/v/Serilog.Sinks.Intercepter.svg)](https://www.nuget.org/packages/Serilog.Sinks.Intercepter/) [![GitHub action build](https://github.com/DanHarltey/Serilog.Sinks.Intercepter/actions/workflows/main-build.yml/badge.svg)](https://github.com/DanHarltey/Serilog.Sinks.Intercepter/actions/workflows/main-build.yml) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Coverage Status](https://coveralls.io/repos/github/DanHarltey/Serilog.Sinks.Intercepter/badge.svg?branch=main)](https://coveralls.io/github/DanHarltey/Serilog.Sinks.Intercepter?branch=main)
 
 Modify, filter, buffer event logs. Buffer log messages and conditionally output them based on later events.
 
