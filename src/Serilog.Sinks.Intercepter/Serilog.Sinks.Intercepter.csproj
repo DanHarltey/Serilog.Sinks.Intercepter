@@ -27,11 +27,15 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="serilog-sink-nuget.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.12.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+    <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,14 +52,15 @@
       <PackageTags>Serilog,Sink,Buffer,Buffered</PackageTags>
       <Description>Modify, filter, buffer event logs. Buffer log messages and conditionally output them based on later events.</Description>
       <Copyright>Copyright (c) Dan Hartley 2023.</Copyright>
-      <AssemblyVersion>1.0.1</AssemblyVersion>
-      <FileVersion>1.0.1</FileVersion>
+      <AssemblyVersion>1.0.2</AssemblyVersion>
+      <FileVersion>1.0.2</FileVersion>
       <GenerateDocumentationFile>True</GenerateDocumentationFile>
-      <Version>1.0.1</Version>
+      <Version>1.0.2</Version>
       <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
       <EnableNETAnalyzers>True</EnableNETAnalyzers>
       <AnalysisLevel>latest-all</AnalysisLevel>
-      <PackageReleaseNotes>Adding greater support for more .Net versions</PackageReleaseNotes>
+      <PackageReleaseNotes>Adding greater support for older versions of Serilog</PackageReleaseNotes>
+      <PackageIcon>serilog-sink-nuget.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -69,6 +74,4 @@
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
-
 </Project>

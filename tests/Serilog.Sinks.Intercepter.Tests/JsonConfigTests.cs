@@ -42,4 +42,27 @@ public class JsonConfigTests
 
         Assert.Equal(3, testSink.LogEvents.Count());
     }
+
+    [Fact]
+    public void WrappedSinkIsDisposed()
+    {
+        // Arrange
+        var testSink = new TestSink();
+        TestSinkExtensions.Instance = testSink;
+
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("SerilogConfig.json")
+            .Build();
+
+        var loggerConfiguration = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration);
+
+        // Act
+        var logger = loggerConfiguration.CreateLogger();
+        logger.Dispose();
+
+        // Assert
+        Assert.True(testSink.IsDisposed);
+    }
 }
