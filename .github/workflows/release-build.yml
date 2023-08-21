@@ -26,7 +26,7 @@ jobs:
 
     - name: Run build script
       working-directory: scripts
-      run: ./dotnet_build.sh
+      run: ./dotnet_build.sh code_coverage
 
     - name: Create GitHub release
       working-directory: scripts
