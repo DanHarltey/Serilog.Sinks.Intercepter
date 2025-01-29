@@ -16,11 +16,12 @@ public sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
 
     public IEnumerable<LogEvent> Intercept(LogEvent logEvent)
     {
+#pragma warning disable CA1510
         if (logEvent is null)
         {
             throw new ArgumentNullException(nameof(logEvent));
         }
-
+#pragma warning restore CA1510
         var buffer = _buffer;
 
         if (buffer == null)
@@ -64,7 +65,7 @@ public sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IEnumerable<LogEvent> BufferAlreadyFlushed(LogEvent logEvent) => new[] { logEvent };
+    private static LogEvent[] BufferAlreadyFlushed(LogEvent logEvent) => new[] { logEvent };
 
     public void Dispose() => _buffer?.Dispose();
 }
