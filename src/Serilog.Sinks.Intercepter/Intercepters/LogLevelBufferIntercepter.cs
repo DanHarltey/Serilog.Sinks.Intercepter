@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Serilog.Sinks.Intercepter.Intercepters;
 
-public sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
+internal sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
 {
     private readonly LogEventLevel _triggerLevel;
     private volatile BlockingCollection<LogEvent>? _buffer = new();

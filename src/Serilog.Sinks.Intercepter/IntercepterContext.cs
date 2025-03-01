@@ -35,6 +35,11 @@ public sealed class IntercepterContext
 
         var currentIntercepter = context.Intercepter;
 
+        if(currentIntercepter is not null)
+        {
+            intercepter = new Chainedntercepter( intercepter, currentIntercepter);
+        }
+
         context.Intercepter = intercepter;
         return new ContextBookmark(context, currentIntercepter);
     }
