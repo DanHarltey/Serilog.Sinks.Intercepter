@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net471;net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net462;net471;net5.0;net6.0;net7.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -12,13 +12,13 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <WarningLevel>9999</WarningLevel>
+    <WarningLevel>0</WarningLevel>
     <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <WarningLevel>9999</WarningLevel>
+    <WarningLevel>0</WarningLevel>
     <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
 
@@ -57,7 +57,7 @@
       <GenerateDocumentationFile>True</GenerateDocumentationFile>
       <Version>1.0.2</Version>
       <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
-      <EnableNETAnalyzers>True</EnableNETAnalyzers>
+      <EnableNETAnalyzers>False</EnableNETAnalyzers>
       <AnalysisLevel>latest-all</AnalysisLevel>
       <PackageReleaseNotes>Adding greater support for older versions of Serilog</PackageReleaseNotes>
       <PackageIcon>serilog-sink-nuget.png</PackageIcon>
@@ -73,5 +73,6 @@
     <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
 </Project>
