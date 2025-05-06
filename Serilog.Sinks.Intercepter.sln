@@ -17,6 +17,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AspMinimalApi", "sam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.WebApp", "samples\Sample.WebApp\Sample.WebApp.csproj", "{B3D69AEC-2BAD-49B6-AA9E-B387A2F3672E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Intercepter.Benchmarks", "benchmarks\Serilog.Sinks.Intercepter.Benchmarks\Serilog.Sinks.Intercepter.Benchmarks.csproj", "{55E4F047-201F-4CB3-ADE1-4D7AD1B2E454}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,10 @@ Global
 		{B3D69AEC-2BAD-49B6-AA9E-B387A2F3672E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3D69AEC-2BAD-49B6-AA9E-B387A2F3672E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3D69AEC-2BAD-49B6-AA9E-B387A2F3672E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55E4F047-201F-4CB3-ADE1-4D7AD1B2E454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55E4F047-201F-4CB3-ADE1-4D7AD1B2E454}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55E4F047-201F-4CB3-ADE1-4D7AD1B2E454}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55E4F047-201F-4CB3-ADE1-4D7AD1B2E454}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +56,7 @@ Global
 		{27133807-6ED0-4312-88F8-3E280E4C2385} = {75A859FF-AACC-4A76-AA25-DBD49AE22C8C}
 		{C75DDF6E-7207-41C0-9BC1-0C36464CE3DE} = {29884AFE-19DD-45B0-83AB-9718F51B2D83}
 		{B3D69AEC-2BAD-49B6-AA9E-B387A2F3672E} = {29884AFE-19DD-45B0-83AB-9718F51B2D83}
+		{55E4F047-201F-4CB3-ADE1-4D7AD1B2E454} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0EAE6558-4929-48DF-AE1A-ADE2BA48F5C1}

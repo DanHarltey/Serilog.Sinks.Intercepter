@@ -23,7 +23,7 @@ public sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
 
         var buffer = _buffer;
 
-        if (buffer == null)
+        if (buffer is null)
         {
             return BufferAlreadyFlushed(logEvent);
         }
@@ -50,7 +50,7 @@ public sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
         // replace the buffer with null, so we do not store any more logs
         var buffer = Interlocked.Exchange(ref _buffer, null);
 
-        if (buffer == null)
+        if (buffer is null)
         {
             return BufferAlreadyFlushed(logEvent);
         }
