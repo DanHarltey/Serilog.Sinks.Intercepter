@@ -2,6 +2,7 @@
 using Serilog.Events;
 using Serilog.Sinks.Intercepter.Internal;
 using Serilog.Sinks.Intercepter.Internal.RingBuffer;
+using Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And;
 
 namespace Serilog.Sinks.Intercepter.Benchmarks;
 
@@ -85,6 +86,60 @@ public class Multi_Threaded_Add_Benchmark
         var events = _events!;
 
         var ringBuffer = new RingBuffer_6_ulong(Capacity);
+        Parallel.For(0, _threads, slice =>
+        {
+            var localEvents = events[slice];
+            for (int i = 0; i < localEvents.Length; i++)
+            {
+                ringBuffer.TryAdd(localEvents[i]);
+            }
+        });
+
+        return ringBuffer;
+    }
+
+    [Benchmark]
+    public object Multi_Thread_Add_7()
+    {
+        var events = _events!;
+
+        var ringBuffer = new RingBuffer_7_nint(Capacity);
+        Parallel.For(0, _threads, slice =>
+        {
+            var localEvents = events[slice];
+            for (int i = 0; i < localEvents.Length; i++)
+            {
+                ringBuffer.TryAdd(localEvents[i]);
+            }
+        });
+
+        return ringBuffer;
+    }
+
+    [Benchmark]
+    public object Multi_Thread_Add_8()
+    {
+        var events = _events!;
+
+        var ringBuffer = new RingBuffer_8_CORINFO_HELP_ASSIGN_REF(Capacity);
+        Parallel.For(0, _threads, slice =>
+        {
+            var localEvents = events[slice];
+            for (int i = 0; i < localEvents.Length; i++)
+            {
+                ringBuffer.TryAdd(localEvents[i]);
+            }
+        });
+
+        return ringBuffer;
+    }
+
+    [Benchmark]
+    public object Multi_Thread_Add_9()
+    {
+        var events = _events!;
+
+        var ringBuffer = new RingBuffer_9_No_And(Capacity);
         Parallel.For(0, _threads, slice =>
         {
             var localEvents = events[slice];

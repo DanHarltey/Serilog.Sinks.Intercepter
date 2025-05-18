@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Serilog.Sinks.Intercepter\Serilog.Sinks.Intercepter.csproj" />
+    <ProjectReference Include="..\..\src\Serilog.Sinks.Intercepter\Serilog.Sinks.Intercepter.csproj" />
   </ItemGroup>
 
 </Project>

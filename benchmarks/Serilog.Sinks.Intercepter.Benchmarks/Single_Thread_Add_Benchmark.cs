@@ -3,6 +3,7 @@ using Serilog.Events;
 using Serilog.Sinks.Intercepter.Benchmarks.Graveyard;
 using Serilog.Sinks.Intercepter.Internal;
 using Serilog.Sinks.Intercepter.Internal.RingBuffer;
+using Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +73,51 @@ public class Single_Thread_Add_Benchmark
         var events = _events!;
 
         var ringBuffer = new RingBuffer_6_ulong(Capacity);
+
+        for (int i = 0; i < events.Length; i++)
+        {
+            ringBuffer.TryAdd(events[i]);
+        }
+
+        return ringBuffer;
+    }
+
+    [Benchmark()]
+    public object Single_Thread_Add_7()
+    {
+        var events = _events!;
+
+        var ringBuffer = new RingBuffer_7_nint(Capacity);
+
+        for (int i = 0; i < events.Length; i++)
+        {
+            ringBuffer.TryAdd(events[i]);
+        }
+
+        return ringBuffer;
+    }
+
+    [Benchmark()]
+    public object Single_Thread_Add_8()
+    {
+        var events = _events!;
+
+        var ringBuffer = new RingBuffer_8_CORINFO_HELP_ASSIGN_REF(Capacity);
+
+        for (int i = 0; i < events.Length; i++)
+        {
+            ringBuffer.TryAdd(events[i]);
+        }
+
+        return ringBuffer;
+    }
+
+    [Benchmark()]
+    public object Single_Thread_Add_9()
+    {
+        var events = _events!;
+
+        var ringBuffer = new RingBuffer_9_No_And(Capacity);
 
         for (int i = 0; i < events.Length; i++)
         {

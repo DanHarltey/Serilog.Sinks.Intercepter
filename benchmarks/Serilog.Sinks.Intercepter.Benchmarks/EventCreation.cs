@@ -16,7 +16,7 @@ internal static class EventCreation
         return events;
     }
 
-    private static LogEvent CreateLogEvent(string message) =>
+    public static LogEvent CreateLogEvent(string message) =>
         new(DateTimeOffset.UtcNow,
             LogEventLevel.Information,
             null,
