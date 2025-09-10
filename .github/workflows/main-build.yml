@@ -1,53 +1,68 @@
-name: Build & Test
+name: GitHub action build
 on: push
 
 jobs:
-  build:
+  main-build:
+
     name: Main build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
+    env:
+      TEST_COVERAGE: ${{ matrix.os == 'ubuntu-latest' }}
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: true
 
     steps:
     - name: Git checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Setup .NET 7
-      uses: actions/setup-dotnet@v3
+    - name: Setup .NET 9
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 9.0.x
 
     - name: Run build script
       working-directory: scripts
-      run: ./dotnet_build.sh code_coverage
-
-    - name: Upload nuget package to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: Serilog.Sinks.Intercepter
-        path: ./src/Serilog.Sinks.Intercepter/bin/Release/Serilog.Sinks.Intercepter.*.*upkg
-        if-no-files-found: error
-
-    - name: Move coverage report
-      run: find -name "coverage.info" -type f -exec mv {} . \;
+      shell: bash
+      run: |
+        if [ "$TEST_COVERAGE" == "true" ]
+        then
+          ./dotnet_build.sh test_coverage
+        else
+          ./dotnet_build.sh
+        fi
 
     - name: Upload test coverage to Coveralls
+      if: env.TEST_COVERAGE == 'true'
       uses: coverallsapp/github-action@v2
       with:
-        format: lcov
-        file: coverage.info
+        format: cobertura
+        files: release/coverage.xml
 
-  arm_build:
-    name: ARM build
-    runs-on: buildjet-4vcpu-ubuntu-2204-arm
-
-    steps:
-    - name: Git checkout
-      uses: actions/checkout@v3
-
-    - name: Setup .NET 7
-      uses: actions/setup-dotnet@v3
+    - name: Upload dotnet info
+      uses: actions/upload-artifact@v4
+      if: env.TEST_COVERAGE == 'true'
       with:
-        dotnet-version: 7.0.x
+        name: Built with
+        path: release/dotnet_info.txt
+        if-no-files-found: error
 
-    - name: Run build script
-      working-directory: scripts
-      run: ./dotnet_build.sh
+    - name: Upload test coverage
+      uses: actions/upload-artifact@v4
+      if: env.TEST_COVERAGE == 'true'
+      with:
+        name: Test coverage
+        path: release/coverage.xml
+        if-no-files-found: error
+
+    - name: Upload NuGet packages
+      uses: actions/upload-artifact@v4
+      if: env.TEST_COVERAGE == 'true'
+      with:
+        name: NuGet packages
+        path: release/Serilog.Sinks.Intercepter.*upkg
+        if-no-files-found: error

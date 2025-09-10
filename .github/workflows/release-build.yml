@@ -17,16 +17,16 @@ jobs:
 
     steps:
     - name: Git checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Setup .NET 7
-      uses: actions/setup-dotnet@v3
+    - name: Setup .NET 9
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 9.0.x
 
     - name: Run build script
       working-directory: scripts
-      run: ./dotnet_build.sh code_coverage
+      run: ./dotnet_build.sh test_coverage
 
     - name: Create GitHub release
       working-directory: scripts

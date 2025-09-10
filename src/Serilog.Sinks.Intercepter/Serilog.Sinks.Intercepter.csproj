@@ -1,25 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net462;net471;net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462;net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <LangVersion>11.0</LangVersion>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>latest-all</AnalysisLevel>
   </PropertyGroup>
 
   <PropertyGroup>
-    <LangVersion>11.0</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <WarningLevel>9999</WarningLevel>
-    <NoWarn>1701;1702;CS1591</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <WarningLevel>9999</WarningLevel>
-    <NoWarn>1701;1702;CS1591</NoWarn>
+    <Title>Serilog.Sinks.Intercepter</Title>
+    <Authors>DanHartley</Authors>
+    <Description>Modify, filter, buffer event logs. Buffer log messages and conditionally output them based on later events.</Description>
+	<Copyright>Copyright (c) Dan Hartley 2023.</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DanHarltey/Serilog.Sinks.Intercepter</RepositoryUrl>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
+    <FileVersion>1.0.3</FileVersion>
+    <Version>1.0.3</Version>
+    <PackageReleaseNotes> - Adding direct support for .Net 8 &amp; 9.
+ - Marking as IsAotCompatible
+    </PackageReleaseNotes>
+    <PackageTags>Serilog,Sink,Buffer,Buffered</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageIcon>serilog-sink-nuget.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,7 +43,10 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -43,25 +54,6 @@
     <Using Remove="System.IO" />
     <Using Remove="System.Linq" />
   </ItemGroup>
-
-  <PropertyGroup>
-      <PackageLicenseExpression>MIT</PackageLicenseExpression>
-      <PackageProjectUrl></PackageProjectUrl>
-      <PackageReadmeFile>README.md</PackageReadmeFile>
-      <RepositoryUrl>https://github.com/DanHarltey/Serilog.Sinks.Intercepter</RepositoryUrl>
-      <PackageTags>Serilog,Sink,Buffer,Buffered</PackageTags>
-      <Description>Modify, filter, buffer event logs. Buffer log messages and conditionally output them based on later events.</Description>
-      <Copyright>Copyright (c) Dan Hartley 2023.</Copyright>
-      <AssemblyVersion>1.0.2</AssemblyVersion>
-      <FileVersion>1.0.2</FileVersion>
-      <GenerateDocumentationFile>True</GenerateDocumentationFile>
-      <Version>1.0.2</Version>
-      <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
-      <EnableNETAnalyzers>True</EnableNETAnalyzers>
-      <AnalysisLevel>latest-all</AnalysisLevel>
-      <PackageReleaseNotes>Adding greater support for older versions of Serilog</PackageReleaseNotes>
-      <PackageIcon>serilog-sink-nuget.png</PackageIcon>
-  </PropertyGroup>
 
   <PropertyGroup>
     <!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
@@ -73,5 +65,16 @@
     <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+ </PropertyGroup>
+
+  <PropertyGroup>
+    <WarningLevel>9999</WarningLevel>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NoWarn>1701;1702;CS1591</NoWarn>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>

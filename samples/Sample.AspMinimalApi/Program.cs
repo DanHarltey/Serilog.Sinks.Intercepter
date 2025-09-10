@@ -29,6 +29,7 @@ app.MapGet("/weatherforecast", (ILoggerFactory loggerFactory) =>
 {
     var logger = loggerFactory.CreateLogger("weatherforecast");
     logger.LogInformation("index called");
+    //logger.LogError("Logging error to trigger log line flush");
 
     var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast

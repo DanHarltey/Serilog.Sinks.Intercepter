@@ -26,11 +26,12 @@ public sealed class IntercepterContext
 
     public static IDisposable Push(IntercepterContext context, IIntercepter intercepter)
     {
-        if( context is null)
+#pragma warning disable CA1510
+        if ( context is null)
         {
             throw new ArgumentNullException(nameof(context));
         }
-
+#pragma warning restore CA1510
         var currentIntercepter = context.Intercepter;
 
         context.Intercepter = intercepter;
