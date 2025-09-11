@@ -11,7 +11,7 @@ dotnet build ../ --configuration Release --no-restore -p:ContinuousIntegrationBu
 
 if [ $1 = "test_coverage" ] 
 then
-  dotnet test ../ --configuration Release --no-build --verbosity normal --collect:"Code Coverage;Format=cobertura"
+  dotnet test ../ --configuration Release --no-build --verbosity normal --collect:"Code Coverage;Format=cobertura" --settings:"../.runsettings"
   find ../tests/Serilog.Sinks.Intercepter.Tests/TestResults/ -name "*.cobertura.xml" -type f -exec mv {} ../release/coverage.xml \;
 else
   dotnet test ../ --configuration Release --no-build --verbosity normal
