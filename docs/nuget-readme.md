@@ -1,17 +1,8 @@
-# Serilog.Sinks.Intercepter
-[![NuGet](https://img.shields.io/nuget/v/Serilog.Sinks.Intercepter.svg)](https://www.nuget.org/packages/Serilog.Sinks.Intercepter/) [![GitHub action build](https://github.com/DanHarltey/Serilog.Sinks.Intercepter/actions/workflows/main-build.yml/badge.svg)](https://github.com/DanHarltey/Serilog.Sinks.Intercepter/actions/workflows/main-build.yml) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Coverage Status](https://coveralls.io/repos/github/DanHarltey/Serilog.Sinks.Intercepter/badge.svg?branch=main)](https://coveralls.io/github/DanHarltey/Serilog.Sinks.Intercepter?branch=main)
-
 Modify, filter, buffer event logs. Buffer log messages and conditionally output them based on later events.
 
 A wrapper for other [Serilog](https://serilog.net) sinks. This sink allows you to "intercept" log events just as they are written to a wrapped sink. This is used to modify, filter, buffer event logs. This is especially suited to reducing log volume, for example only writing logs when an error has occurred.
 
 ## Getting started
-
-Install from [NuGet](https://nuget.org/packages/serilog.sinks.intercepter):
-
-```powershell
-Install-Package Serilog.Sinks.Intercepter
-```
 
 Assuming you have already installed the target sink, such as the console sink, move the wrapped sink's configuration within a `WriteTo.Intercepter()` statement:
 
@@ -66,24 +57,5 @@ Can be used per application request to only write the logs of requests where the
 
 In the event of any buffering, the log events sent to the output are in the original order and with the original timestamps.
 
-## ASP.NET Core integration
-
-See [samples/Sample.WebApp/](https://github.com/DanHarltey/Serilog.Sinks.Intercepter/tree/main/samples) for the full sample of using this with ASP.NET Core.
-
-The configuration used in the sample:
-```csharp
-builder.Host.UseSerilog((ctx, lc) =>
-  lc.WriteTo.Intercepter(x => x.Console()));
-```
-
-The sample shows how to add `IntercepterContext.PushLogLevelBuffer` to the ASP.NET Core pipeline as middleware:
-
-```csharp
-public async Task Invoke(HttpContext httpContext)
-{
-  using (IntercepterContext.PushLogLevelBuffer())
-  {
-      await _next(httpContext);
-  }
-}
-```
+### ASP.NET Core integration
+Please see [here](https://github.com/DanHarltey/Serilog.Sinks.Intercepter?tab=readme-ov-file#aspnet-core-integration) for details.
