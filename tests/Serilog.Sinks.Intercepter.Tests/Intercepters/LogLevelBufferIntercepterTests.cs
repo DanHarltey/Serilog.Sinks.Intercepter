@@ -33,6 +33,20 @@ public class LogLevelBufferIntercepterTests
     }
 
     [Fact]
+    public void InterceptThrowsObjectDisposedException()
+    {
+        // Arrange
+        var logLevelBuffer = new LogLevelBufferIntercepter(LogEventLevel.Error);
+        var expected = CreateLogEvent(LogEventLevel.Fatal);
+
+        // Act
+        logLevelBuffer.Dispose();
+
+        // Assert
+        Assert.Throws<ObjectDisposedException>(() => logLevelBuffer.Intercept(expected));
+    }
+
+    [Fact]
     public void InterceptReturnsEmptyWhenBelowTriggerLevel()
     {
         // Arrange

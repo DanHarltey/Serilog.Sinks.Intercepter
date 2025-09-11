@@ -1,4 +1,6 @@
-﻿using Serilog.Sinks.Intercepter.Tests.Mocks;
+﻿using Serilog.Events;
+using Serilog.Sinks.Intercepter.Intercepters;
+using Serilog.Sinks.Intercepter.Tests.Mocks;
 
 namespace Serilog.Sinks.Intercepter.Tests;
 
@@ -75,6 +77,17 @@ public sealed class IntercepterContextTests
 
         // Assert
         Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public void PushThrowsArgumentNullException()
+    {
+        // Arrange
+        IntercepterContext? context = null;
+        var intercepter = new TestIntercepter(true, x => throw new NotImplementedException());
+
+        // Act, Assert
+        Assert.Throws<ArgumentNullException>(() => IntercepterContext.Push(context!, intercepter));
     }
 
     [Fact]
@@ -186,5 +199,60 @@ public sealed class IntercepterContextTests
         }
 
         Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public void PushLogLevelBuffer()
+    {
+        // Arrange
+        IIntercepter? actualIntercepter;
+
+        // Act
+        using (IntercepterContext.PushLogLevelBuffer())
+        {
+            actualIntercepter = IntercepterContext.Default.Intercepter;
+        }
+
+        var actual = Assert.IsType<LogLevelBufferIntercepter>(actualIntercepter);
+        Assert.Equal(LogEventLevel.Error, actual.TriggerLevel);
+    }
+
+    [Theory]
+    [InlineData(LogEventLevel.Error)]
+    [InlineData(LogEventLevel.Information)]
+    public void PushLogLevelBufferWithLevel(LogEventLevel logEventLevel)
+    {
+        // Arrange
+        IIntercepter? actualIntercepter;
+
+
+        // Act
+        using (IntercepterContext.PushLogLevelBuffer(logEventLevel))
+        {
+            actualIntercepter = IntercepterContext.Default.Intercepter;
+        }
+
+        var actual = Assert.IsType<LogLevelBufferIntercepter>(actualIntercepter);
+        Assert.Equal(logEventLevel, actual.TriggerLevel);
+    }
+
+    [Theory]
+    [InlineData(LogEventLevel.Error)]
+    [InlineData(LogEventLevel.Information)]
+    public void PushLogLevelBufferWithContextAndLevel(LogEventLevel logEventLevel)
+    {
+        // Arrange
+        IIntercepter? actualIntercepter;
+
+        var context = new IntercepterContext();
+
+        // Act
+        using (IntercepterContext.PushLogLevelBuffer(context, logEventLevel))
+        {
+            actualIntercepter = context.Intercepter;
+        }
+
+        var actual = Assert.IsType<LogLevelBufferIntercepter>(actualIntercepter);
+        Assert.Equal(logEventLevel, actual.TriggerLevel);
     }
 }

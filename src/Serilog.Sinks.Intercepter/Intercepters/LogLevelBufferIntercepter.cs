@@ -12,6 +12,8 @@ public sealed class LogLevelBufferIntercepter : IIntercepter, IDisposable
 
     public LogLevelBufferIntercepter(LogEventLevel triggerLevel) => _triggerLevel = triggerLevel;
 
+    internal LogEventLevel TriggerLevel => _triggerLevel;
+
     public bool Reject(LogEvent logEvent) => false;
 
     public IEnumerable<LogEvent> Intercept(LogEvent logEvent)
