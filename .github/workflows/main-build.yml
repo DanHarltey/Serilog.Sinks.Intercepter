@@ -18,12 +18,21 @@ jobs:
 
     steps:
     - name: Git checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
+
+    - name: Fix buildjet permissions
+      if: matrix.os == 'buildjet-4vcpu-ubuntu-2204-arm'
+      run: sudo chmod -R 777 /usr/share/dotnet/
 
     - name: Setup .NET 9
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 9.0.x
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
 
     - name: Run build script
       working-directory: scripts
@@ -44,7 +53,7 @@ jobs:
         files: release/coverage.xml
 
     - name: Upload dotnet info
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: env.TEST_COVERAGE == 'true'
       with:
         name: Built with
@@ -52,7 +61,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload test coverage
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: env.TEST_COVERAGE == 'true'
       with:
         name: Test coverage
@@ -60,7 +69,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload NuGet packages
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: env.TEST_COVERAGE == 'true'
       with:
         name: NuGet packages
