@@ -22,6 +22,7 @@ namespace Serilog.Sinks.Intercepter.Benchmarks.Graveyard
         private readonly Slot[] _slots;
         private int _index;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public RingBuffer_1_Class(int capacity)
         {
             _slots = new Slot[capacity];
@@ -49,6 +50,7 @@ namespace Serilog.Sinks.Intercepter.Benchmarks.Graveyard
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public bool TryAdd(LogEvent logEvent)
         {
             var currentIndex = Volatile.Read(ref _index);

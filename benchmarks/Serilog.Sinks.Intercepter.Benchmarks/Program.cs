@@ -6,9 +6,10 @@ namespace Serilog.Sinks.Intercepter.Benchmarks
     {
         static void Main(string[] args)
         {
-            _ = BenchmarkRunner.Run<Add_Benchmark>();
-            ////_ = BenchmarkRunner.Run<Single_Thread_Add_Benchmark>();
-            ////_ = BenchmarkRunner.Run<Multi_Threaded_Add_Benchmark>();
+            //_ = BenchmarkRunner.Run<Ctor_Benchmark>();
+            //_ = BenchmarkRunner.Run<Add_Benchmark>();
+            _ = BenchmarkRunner.Run<Single_Thread_Add_Benchmark>();
+            //_ = BenchmarkRunner.Run<Multi_Threaded_Add_Benchmark>();
         }
     }
 }

@@ -1,15 +1,9 @@
 ﻿using Serilog;
 using Serilog.Events;
 using Serilog.Sinks;
-using Serilog.Sinks;
-using Serilog.Sinks.Intercepter;
 using Serilog.Sinks.Intercepter;
 using Serilog.Sinks.Intercepter.Internal;
-using Serilog.Sinks.Intercepter.Internal;
-using Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And;
-using Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And;
-using System;
-using System;
+using Serilog.Sinks.Intercepter.Internal.RingBuffer_10_Increment;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,10 +13,23 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
+namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_10_Increment
 {
-    internal sealed class RingBuffer_9_No_And
+    internal sealed class RingBuffer_10_Increment
     {
+        /*
+         * max is 9,223,372,036,854,775,807
+         *      /             4,000,000,000
+         *                       2,305,843,009
+         *                       2305843009 seconds
+         *                       73 years
+         *                       
+         *                       
+         * nine quintillion, two hundred and twenty-three quadrillion, three hundred and seventy-two trillion, thirty-six billion, eight hundred and fifty-four million
+         *         // The current barrier phase
+        // We don't need to worry about overflow, the max value is 2^63-1; If it starts from 0 at a
+        // rate of 4 billion increments per second, it will takes about 64 years to overflow.
+         */
         private const ulong COMPLETE_ADDING_MASK = unchecked(0x8000000000000000);
         private const ulong INDEX_MASK = unchecked(COMPLETE_ADDING_MASK - 1);
 
@@ -32,15 +39,16 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
         private readonly int _capacity;
         private readonly int _indexMask;
         private readonly ulong _rowMask;
+        private ulong _amountAdded;
 
         public bool CompletedAdding => IsComplete(Volatile.Read(ref _index));
 
         internal int Capacity => _slots.Length;
 
-        internal ulong Index => Volatile.Read(ref _index) & INDEX_MASK;
+        internal ulong Index => Volatile.Read(ref _amountAdded) & INDEX_MASK;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public RingBuffer_9_No_And(int capacity)
+        public RingBuffer_10_Increment(int capacity)
         {
             if (capacity <= 0)
             {
@@ -64,15 +72,16 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
         {
             var currentIndex = Volatile.Read(ref _index);
 
-            while (!IsComplete(currentIndex))
-            {
-                var actualIndex = Interlocked.CompareExchange(
-                    ref _index,
-                    currentIndex | COMPLETE_ADDING_MASK,
-                    currentIndex);
+            var actualIndex = Interlocked.CompareExchange(
+                ref _index,
+                COMPLETE_ADDING_MASK,
+                currentIndex);
 
+            if (!IsComplete(currentIndex))
+            {
                 if (actualIndex == currentIndex)
                 {
+                    _amountAdded = actualIndex;
                     return true;
                 }
 
@@ -85,34 +94,17 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
         [MethodImpl(MethodImplOptions.NoInlining)]
         public bool TryAdd(LogEvent logEvent)
         {
-            var currentIndex = Volatile.Read(ref _index);
+            var hasAdded = false;
+            var localIndex = Interlocked.Increment(ref _index) - 1;
 
-            // Loop in case of contention...
-            while (!IsComplete(currentIndex))
+            if (!IsComplete(localIndex))
             {
-                var newIndex = currentIndex + 1;
 
-                //// add overflow check
-                //if(IsComplete(newIndex))
-                //{
-                //    throw new Exception();
-                //}
-
-                var actualIndex = Interlocked.CompareExchange(
-                    ref _index,
-                    newIndex,
-                    currentIndex);
-
-                if (currentIndex == actualIndex)
-                {
-                    AddToSlot(logEvent, actualIndex);
-                    return true;
-                }
-
-                currentIndex = actualIndex;
+                AddToSlot(logEvent, localIndex);
+                hasAdded = true;
             }
 
-            return false;
+            return hasAdded;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,7 +119,7 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
 
             if (Volatile.Read(ref slot.Verison) != index)
             {
-                var spinWait = new SpinWait();
+                SpinWait spinWait = default;
                 do
                 {
                     spinWait.SpinOnce();
@@ -140,7 +132,7 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
 
         public IReadOnlyCollection<LogEvent> GetEnumerable()
         {
-            return new RingBuffer_9_No_AndEnumerable(this);
+            return new RingBuffer_10_IncrementEnumerable(this);
         }
 
         private struct Slot
@@ -159,11 +151,11 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
             // on x86 gets compiled to mov, test
             (index & COMPLETE_ADDING_MASK) != 0;
 
-        private class RingBuffer_9_No_AndEnumerable : IReadOnlyCollection<LogEvent>
+        private class RingBuffer_10_IncrementEnumerable : IReadOnlyCollection<LogEvent>
         {
-            private readonly RingBuffer_9_No_And _buffer;
+            private readonly RingBuffer_10_Increment _buffer;
 
-            public RingBuffer_9_No_AndEnumerable(RingBuffer_9_No_And buffer)
+            public RingBuffer_10_IncrementEnumerable(RingBuffer_10_Increment buffer)
             {
                 _buffer = buffer;
             }
@@ -172,7 +164,7 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
 
             public IEnumerator<LogEvent> GetEnumerator()
             {
-                return new RingBuffer_9_No_AndEnumerator(_buffer);
+                return new RingBuffer_10_IncrementEnumerator(_buffer);
             }
 
             IEnumerator IEnumerable.GetEnumerator()
@@ -181,22 +173,22 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
             }
         }
 
-        private class RingBuffer_9_No_AndEnumerator : IEnumerator<LogEvent>
+        private class RingBuffer_10_IncrementEnumerator : IEnumerator<LogEvent>
         {
-            private readonly RingBuffer_9_No_And _RingBuffer_9_No_And;
+            private readonly RingBuffer_10_Increment _RingBuffer_10_Increment;
             private int _index = -1;
 
-            public RingBuffer_9_No_AndEnumerator(RingBuffer_9_No_And RingBuffer_9_No_And)
+            public RingBuffer_10_IncrementEnumerator(RingBuffer_10_Increment RingBuffer_10_Increment)
             {
-                _RingBuffer_9_No_And = RingBuffer_9_No_And;
-                var currentIndex = (int)(_RingBuffer_9_No_And._index & unchecked(COMPLETE_ADDING_MASK - 1));
-                if (currentIndex < RingBuffer_9_No_And.Capacity)
+                _RingBuffer_10_Increment = RingBuffer_10_Increment;
+                var currentIndex = (int)(_RingBuffer_10_Increment._amountAdded & unchecked(COMPLETE_ADDING_MASK - 1));
+                if (currentIndex < RingBuffer_10_Increment.Capacity)
                 {
                     _index = -1;
                 }
                 else
                 {
-                    _index = currentIndex - RingBuffer_9_No_And._slots.Length - 1;
+                    _index = currentIndex - RingBuffer_10_Increment._slots.Length - 1;
                 }
             }
 
@@ -204,9 +196,9 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
             {
                 get
                 {
-                    var index = _index % _RingBuffer_9_No_And._slots.Length;
+                    var index = _index % _RingBuffer_10_Increment._slots.Length;
 
-                    ref var slot = ref _RingBuffer_9_No_And._slots[index];
+                    ref var slot = ref _RingBuffer_10_Increment._slots[index];
                     return slot.LogEvent;
                 }
             }
@@ -220,7 +212,7 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer_9_No_And
             {
                 ++_index;
 
-                var currentIndex = _RingBuffer_9_No_And._index & unchecked(COMPLETE_ADDING_MASK - 1);
+                var currentIndex = _RingBuffer_10_Increment._amountAdded & unchecked(COMPLETE_ADDING_MASK - 1);
 
                 if (_index < (int)currentIndex)
                 {

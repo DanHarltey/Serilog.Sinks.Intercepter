@@ -24,6 +24,7 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer
 
         internal ulong Index => Volatile.Read(ref _index) & INDEX_MASK;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public RingBuffer_7_nint(int capacity)
         {
             if (capacity <= 0)
@@ -61,6 +62,7 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public bool TryAdd(LogEvent logEvent)
         {
             var currentIndex = Volatile.Read(ref _index);
