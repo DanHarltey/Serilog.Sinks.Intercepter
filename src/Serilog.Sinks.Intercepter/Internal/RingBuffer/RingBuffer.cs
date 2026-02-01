@@ -19,8 +19,6 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer
 {
     internal sealed class RingBuffer
     {
-
-
         /// <summary>Padded head and tail indices, to avoid false sharing between producers and consumers.</summary>
         [DebuggerDisplay("Head = {Head}, Tail = {Tail}")]
         [StructLayout(LayoutKind.Explicit, Size = 2 * 128)] // padding before/between/after fields
@@ -46,14 +44,14 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer
          */
         private const ulong COMPLETE_ADDING_MASK = unchecked(0x8000000000000000);
         private const ulong INDEX_MASK = unchecked(0x7fffffffffffffff);
-        
+
         private PaddedHeadAndTail _index;
         private ulong _completedIndex;
         private readonly int _capacity;
         private readonly Slot[] _slots;
         private readonly int _rowShift;
         private readonly int _indexMask;
-     
+
         public bool CompletedAdding => IsComplete(Volatile.Read(ref _index.Index));
 
         internal int Capacity => _slots.Length;
@@ -121,11 +119,15 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer
                 var slotIndex = ((int)localIndex) & _indexMask;
                 var expectedVerison = localIndex >> _rowShift;
 
+#if DEBUG
+                PauseOnSlotWrite();
+#endif
                 // using index here as oppossed to Unsafe, to allow JIT to use CORINFO_HELP_ASSIGN_REF instead of slower CORINFO_HELP_CHECKED_ASSIGN_REF
                 ref var slot = ref _slots[slotIndex];
 
                 if (Volatile.Read(ref slot.Verison) != expectedVerison)
                 {
+                    // rare case, do not inline for speed
                     WaitForSlot(ref slot, expectedVerison);
                 }
 
@@ -168,6 +170,24 @@ namespace Serilog.Sinks.Intercepter.Internal.RingBuffer
         private static bool IsComplete(ulong index) =>
             // on x86 gets compiled to mov, test, jne
             (index & COMPLETE_ADDING_MASK) != 0;
+
+#if DEBUG
+        private bool _pauseOnSlotWrite = false;
+        public void PauseOnSlotWrite(bool pause)
+        {
+            Volatile.Write(ref _pauseOnSlotWrite, pause);
+            Interlocked.MemoryBarrier();
+        }
+
+        private void PauseOnSlotWrite()
+        {
+            if (Volatile.Read(ref _pauseOnSlotWrite))
+            {
+                PauseOnSlotWrite(false);
+                Thread.Sleep(100);
+            }
+        }
+#endif
 
         private class RingBufferEnumerable : IEnumerable<LogEvent>//  IReadOnlyCollection<LogEvent>
         {

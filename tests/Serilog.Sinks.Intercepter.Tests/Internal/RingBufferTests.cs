@@ -7,8 +7,6 @@ namespace Serilog.Sinks.Intercepter.Tests.Internal;
 
 public class RingBufferTests
 {
-    private int i;
-
     [Fact]
     public void RingBuffer_Can_Be_Empty()
     {
@@ -204,12 +202,32 @@ public class RingBufferTests
         }
     }
 
-    //[Fact]
-    //public void RingBuffer_Wraps_Around()
-    //{
-    //    Assert.Fail();
-    //}
+    [Fact]
+    public void RingBuffer_Wraps_Around()
+    {
+        // 5 will get rounded up to 8 inside the ringbuffer
+        const int Capacity = 5;
+        const int EventsCount = Capacity * 2;
 
+        // arange
+        var ringBuffer = new RingBuffer(Capacity);
+        var logEvents = CreateEvents(EventsCount);
+        var expected = logEvents.TakeLast(Capacity).ToList();
+
+        // act
+        foreach (var logEvent in logEvents)
+        {
+            Assert.True(
+                ringBuffer.TryAdd(logEvent));
+        }
+        Assert.True(ringBuffer.CompleteAdding());
+        var actual = ringBuffer.GetEnumerable().ToList();
+
+        // asset
+        Assert.Equal(expected, actual);
+    }
+
+#if DEBUG
     [Fact]
     public void Ring_Buffer_Supports_Multiple_Producers_Without_Overwriting()
     {
@@ -222,80 +240,41 @@ public class RingBufferTests
          */
 
         // arange
-        const int Capacity = 512;
+        const int Capacity = 4;
         const int EventsCount = Capacity * 2;
-        // higher thread count then Capacity, to force contention
-        const int ThreadCount = Capacity * 4;
+
+        var ringBuffer = new RingBuffer(Capacity);
+        ringBuffer.PauseOnSlotWrite(true);
 
         var logEvents = CreateEvents(EventsCount);
-        var threadedAction = new ThreadedAction(ThreadCount);
-
         var expected = logEvents
             .TakeLast(Capacity)
-            .ToHashSet();
+            .ToList();
 
-        var total = 0;
-        var nonMatching = 0;
-        var startTime = DateTime.UtcNow;
-        while ((DateTime.UtcNow - startTime).TotalSeconds < 5)
+        // act
+        var thread = new Thread(() => ringBuffer.TryAdd(logEvents[0]));
+        thread.Start();
+
+        var spinWait = new SpinWait();
+        while (thread.ThreadState == ThreadState.Running)
         {
-            // act
-            var actual = MultithreadAction(Capacity, logEvents, threadedAction);
-
-            // assert
-            for (int i = 0; i < actual.Count; i++)
-            {
-                if (!expected.Contains(actual[i]))
-                {
-                    nonMatching++;
-                }
-            }
-            total += actual.Count;
+            // wait until thread is sleeping
+            spinWait.SpinOnce();
         }
 
-        /*
-         * This test is a bit fuzzy.
-         * Because of the high thread contention in this test, older logs may be added after newer ones.
-         */
-        var percent = (double)nonMatching / total * 100;
-        Assert.True(percent <= 5, $"Overwriting may have occoured. Percentage:{percent}%");
-    }
-
-    [Fact]
-    public void Size()
-    {
-        var tests = new int[] { 2, 3, 4 };
-
-        foreach (var test in tests)
+        foreach (var item in logEvents.Skip(1))
         {
-            var capacity = test;
-            var capacityTakeOne = capacity - 1;
-            var leadingZeros = BitOperations.LeadingZeroCount((uint)capacityTakeOne);
-
-            if ((capacity & capacityTakeOne) != 0)
-            {
-                // not POW of 2
-                capacity = (int)(0x1_0000_0000ul >> leadingZeros);
-                capacityTakeOne = capacity - 1;
-            }
-
-            var indexMask = capacityTakeOne;
-            var rowShift = 32 - leadingZeros;
+            ringBuffer.TryAdd(item);
         }
-        int size = 1;
-        var leadingZero = BitOperations.LeadingZeroCount((uint)size);
-        // capacity = (int)(0x1_0000_0000ul >> leadingZero);
-        //var dddd = 32 - leadingZero;
-        //var dddsdf = BitOperations.TrailingZeroCount(capacity);
-        const ulong COMPLETE_ADDING_MASK = unchecked(0x8000000000000000);
-        const long COMPLETE_ADDING_MASK2 = unchecked((long)unchecked(0x8000000000000000));
-        var lalala = COMPLETE_ADDING_MASK2 + 1;
-        var maxIndexValue = COMPLETE_ADDING_MASK - 1;
 
-        var seconds = maxIndexValue / 4_000_000_000;
+        thread.Join();
+        ringBuffer.CompleteAdding();
 
-        var years = seconds / 60 / 60 / 24 / 365;
+        // assert
+        var actual = ringBuffer.GetEnumerable().ToList();
+        Assert.Equal(expected, actual);
     }
+#endif
 
     private static List<LogEvent> MultithreadAction(int bufferCapacity, LogEvent[] logEvents, ThreadedAction threadedAction)
     {

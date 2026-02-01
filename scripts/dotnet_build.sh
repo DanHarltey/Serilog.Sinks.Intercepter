@@ -11,3 +11,5 @@ else
 fi
 
 dotnet pack ../ --configuration Release --no-build
+
+dotnet test ../ --configuration Debug --filter DisplayName~Ring_Buffer_Supports_Multiple_Producers_Without_Overwriting --verbosity normal
