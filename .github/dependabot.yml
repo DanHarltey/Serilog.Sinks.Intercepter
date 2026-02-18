@@ -14,7 +14,7 @@ updates:
 
   - package-ecosystem: "nuget"
     directories:
-      - "/src/*/"
+      - "/src/**/*"
     schedule:
       interval: "weekly"
       day: "wednesday"
@@ -28,8 +28,8 @@ updates:
 
   - package-ecosystem: "nuget"
     directories: 
-      - "/tests/*/"
-      - "/samples/*/"
+      - "/tests/**/*"
+      - "/samples/**/*"
     schedule:
       interval: "weekly"
       day: "wednesday"
