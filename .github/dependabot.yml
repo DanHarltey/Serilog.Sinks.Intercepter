@@ -14,10 +14,9 @@ updates:
 
   - package-ecosystem: "nuget"
     directories:
-      - "/src/**/*"
+      - "/src/*"
     schedule:
-      interval: "weekly"
-      day: "wednesday"
+      interval: "daily"
     open-pull-requests-limit: 10
     ignore:
       - dependency-name: "Serilog"
@@ -28,11 +27,10 @@ updates:
 
   - package-ecosystem: "nuget"
     directories: 
-      - "/tests/**/*"
-      - "/samples/**/*"
+      - "/tests/*"
+      - "/samples/*"
     schedule:
-      interval: "weekly"
-      day: "wednesday"
+      interval: "daily"
     open-pull-requests-limit: 10
     groups:
       dotnet:
