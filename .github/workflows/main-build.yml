@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
+        os: [ubuntu-latest, ubuntu-24.04-arm]
     env:
       TEST_COVERAGE: ${{ matrix.os == 'ubuntu-latest' }}
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -19,10 +19,6 @@ jobs:
     steps:
     - name: Git checkout
       uses: actions/checkout@v6
-
-    - name: Fix buildjet permissions
-      if: matrix.os == 'buildjet-4vcpu-ubuntu-2204-arm'
-      run: sudo chmod -R 777 /usr/share/dotnet/
 
     - name: Setup .NET 9
       uses: actions/setup-dotnet@v5
