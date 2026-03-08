@@ -14,9 +14,10 @@ updates:
 
   - package-ecosystem: "nuget"
     directories:
-      - "/src/*"
+      - "/src/Serilog.Sinks.Intercepter/*"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "wednesday"
     open-pull-requests-limit: 10
     ignore:
       - dependency-name: "Serilog"
@@ -26,11 +27,12 @@ updates:
           - "*"
 
   - package-ecosystem: "nuget"
-    directories: 
-      - "/tests/*"
-      - "/samples/*"
+    directory: "/" 
+    exclude-paths:
+      - "/src/Serilog.Sinks.Intercepter/*"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "wednesday"
     open-pull-requests-limit: 10
     groups:
       dotnet:
